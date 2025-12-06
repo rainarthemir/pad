@@ -586,3 +586,92 @@ body {
         padding-left: 15px;
     }
 }
+/* Добавить в существующий CSS */
+
+.current-marker {
+    color: #00ccff;
+    font-size: 0.9em;
+    font-weight: normal;
+    margin-left: 8px;
+}
+
+.no-selection {
+    text-align: center;
+    padding: 60px 20px;
+    color: #aaccff;
+}
+
+.no-selection h3 {
+    color: #ffcc00;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.no-selection .tip {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(255, 204, 0, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 204, 0, 0.3);
+    color: #ffcc00;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.file-list {
+    text-align: left;
+    max-width: 400px;
+    margin: 20px auto;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.file-list ul {
+    margin: 10px 0 0 20px;
+    color: #cccccc;
+}
+
+.file-list li {
+    margin-bottom: 5px;
+}
+
+.shared-stops {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+}
+
+.shared-stop {
+    padding: 6px 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #cccccc;
+}
+
+.shared-info {
+    background-color: rgba(255, 255, 255, 0.03);
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-left: 20px;
+}
+
+.shared-info h4 {
+    color: #ffcc00;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.shared-info p {
+    color: #cccccc;
+    margin-bottom: 10px;
+}
