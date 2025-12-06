@@ -6,283 +6,323 @@
 
 body {
     font-family: 'Roboto', 'Arial', sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: linear-gradient(135deg, #0a0a14 0%, #1a1a2e 100%);
     color: #ffffff;
     min-height: 100vh;
-    padding: 20px;
+    padding: 15px;
+    font-size: 14px;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     background-color: #0d0d1a;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     overflow: hidden;
-    border: 2px solid #2d2d4d;
+    border: 1px solid #2a2a40;
 }
 
 .header {
-    background: linear-gradient(90deg, #003366 0%, #004080 100%);
-    padding: 20px 30px;
-    border-bottom: 3px solid #0055aa;
+    background: linear-gradient(90deg, #001a33 0%, #00264d 100%);
+    padding: 15px 25px;
+    border-bottom: 2px solid #003366;
+}
+
+.station-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .station-name {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     font-weight: 700;
     color: #ffffff;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    margin-bottom: 20px;
-    letter-spacing: 1px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.5px;
+    margin: 0;
 }
 
-.line-selector {
-    display: flex;
-    gap: 40px;
-    flex-wrap: wrap;
-}
-
-.line-selection {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 15px;
-    border-radius: 8px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    flex: 1;
-    min-width: 300px;
-}
-
-.line-selection label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #aaccff;
-    font-size: 0.9rem;
-}
-
-.line-selection select {
-    width: 100%;
-    padding: 8px 12px;
-    margin-bottom: 15px;
-    border: 2px solid #0055aa;
-    border-radius: 6px;
-    background-color: #1a1a2e;
-    color: #ffffff;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.line-selection select:focus {
-    outline: none;
-    border-color: #0099ff;
-    box-shadow: 0 0 0 2px rgba(0, 153, 255, 0.3);
-}
-
-.line-selection option {
-    background-color: #1a1a2e;
-    color: white;
-}
-
-.departure-board {
-    padding: 30px;
-    background-color: #0a0a14;
-    min-height: 400px;
-}
-
-.departure-list {
-    display: grid;
-    gap: 15px;
-}
-
-.departure-item {
-    background: linear-gradient(90deg, #1a1a2e 0%, #2d2d4d 100%);
-    border-radius: 8px;
-    padding: 20px;
-    border-left: 6px solid;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    animation: fadeIn 0.5s ease forwards;
-}
-
-.departure-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.line-badge {
-    min-width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1.5rem;
-    color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    flex-shrink: 0;
-}
-
-.departure-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.destination {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 5px;
-    color: #ffffff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.time {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #ffcc00;
-    text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
-    min-width: 120px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.stops-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    align-items: center;
-    font-size: 0.9rem;
-    color: #aaccff;
-}
-
-.stop-item {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    color: #cccccc;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.stop-item:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-}
-
-.next-stops {
-    color: #aaccff;
-    font-size: 0.9rem;
-    margin-top: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.platform {
+.stop-id {
     background-color: rgba(0, 85, 170, 0.3);
-    padding: 5px 10px;
+    padding: 8px 15px;
     border-radius: 4px;
     font-size: 0.9rem;
     color: #aaccff;
     border: 1px solid rgba(0, 85, 170, 0.5);
+}
+
+.stop-id span {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.line-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.control-group {
+    flex: 1;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    color: #88bbff;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.control-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #004080;
+    border-radius: 4px;
+    background-color: #1a1a2e;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.control-group select:hover {
+    border-color: #0066cc;
+}
+
+.control-group select:focus {
+    outline: none;
+    border-color: #0099ff;
+    box-shadow: 0 0 0 2px rgba(0, 153, 255, 0.2);
+}
+
+.plan-board {
+    padding: 0;
+    background-color: #0a0a14;
+    min-height: 600px;
+    position: relative;
+}
+
+.route-display {
+    padding: 25px;
+    min-height: 600px;
+    position: relative;
+}
+
+/* Стили для отображения схемы как на табло RER */
+.route-scheme {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.route-line {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.line-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid currentColor;
+}
+
+.line-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: white;
     flex-shrink: 0;
 }
 
-.footer {
-    background-color: #1a1a2e;
-    padding: 15px 30px;
-    border-top: 2px solid #2d2d4d;
+.line-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.line-direction {
+    font-size: 1.4rem;
+    color: #cccccc;
+    font-weight: 500;
+    margin-left: auto;
+}
+
+.stops-container {
+    position: relative;
+    padding-left: 55px;
+    min-height: 100px;
+}
+
+.line-track {
+    position: absolute;
+    left: 35px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: currentColor;
+    opacity: 0.6;
+}
+
+.stops-list {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.update-time {
-    color: #cccccc;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-.update-time span {
-    color: #ffcc00;
-    font-weight: 500;
-}
-
-.station-id {
-    color: #cccccc;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-.station-id span {
-    color: #aaccff;
-    font-weight: 500;
-}
-
-.data-info {
-    color: #88cc88;
-    font-size: 0.8rem;
-    font-style: italic;
-}
-
-/* Анимации */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Совместные линии */
-.shared-line-group {
+.stop-item {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
+    gap: 15px;
+    min-height: 44px;
 }
 
-.shared-line-connector {
-    width: 20px;
+.stop-marker {
+    position: absolute;
+    left: -20px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 3px solid currentColor;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+.stop-name {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #ffffff;
+    padding: 8px 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex: 1;
+    transition: all 0.2s ease;
+}
+
+.stop-name.current {
+    background-color: rgba(0, 153, 255, 0.2);
+    border-color: #0099ff;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(0, 153, 255, 0.3);
+}
+
+.stop-name.terminal {
+    background-color: rgba(255, 204, 0, 0.2);
+    border-color: #ffcc00;
+    font-weight: 700;
+}
+
+/* Стили для совместных участков */
+.shared-section {
+    position: relative;
+    margin-left: 55px;
+    padding-left: 20px;
+    border-left: 4px dashed rgba(255, 255, 255, 0.3);
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.shared-line {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.shared-line .line-header {
+    margin-left: -20px;
+}
+
+.shared-line .line-track {
+    left: -20px;
+}
+
+.shared-line .stop-item {
+    margin-left: -20px;
+}
+
+.shared-connector {
+    position: absolute;
+    left: -12px;
+    width: 24px;
     height: 4px;
     background: linear-gradient(90deg, 
-        var(--line1-color, #666) 0%, 
-        var(--line2-color, #999) 100%);
-    border-radius: 2px;
+        var(--line1-color) 0%, 
+        var(--line2-color) 100%);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Мини-селекторы на схеме */
+.mini-selector {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.mini-selector select {
+    padding: 4px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    background-color: #1a1a2e;
+    color: white;
+    font-size: 0.85rem;
 }
 
 /* Состояние загрузки */
 .loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
-    padding: 60px 20px;
     color: #aaccff;
+    z-index: 100;
 }
 
 .loading-spinner {
-    border: 4px solid rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(255, 255, 255, 0.1);
     border-left-color: #0099ff;
     border-radius: 50%;
     width: 40px;
     height: 40px;
     animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
+    margin: 0 auto 15px;
 }
 
 @keyframes spin {
@@ -291,12 +331,17 @@ body {
 
 /* Сообщения об ошибке */
 .error-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
-    padding: 40px 20px;
+    padding: 30px;
     background: rgba(255, 107, 107, 0.1);
     border-radius: 8px;
     border: 2px solid #ff6b6b;
-    margin: 20px 0;
+    max-width: 600px;
+    width: 90%;
 }
 
 .error-message h3 {
@@ -307,110 +352,237 @@ body {
 .error-message p {
     color: #cccccc;
     margin: 5px 0;
+    font-size: 0.95rem;
 }
 
-.no-departures {
-    text-align: center;
-    padding: 40px 20px;
-    background: rgba(255, 204, 0, 0.1);
-    border-radius: 8px;
-    border: 2px solid #ffcc00;
+/* Информация о линиях */
+.lines-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.no-departures h3 {
+.line-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border: 1px solid currentColor;
+    opacity: 0.8;
+}
+
+.line-info-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+}
+
+/* Легенда */
+.legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.legend-line, .legend-shared, .legend-transfer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #cccccc;
+}
+
+.legend-line::before,
+.legend-shared::before {
+    content: '●';
+    font-size: 1rem;
+}
+
+.legend-line::before {
+    color: #0099ff;
+}
+
+.legend-shared::before {
+    background: linear-gradient(90deg, #0099ff 0%, #ff3300 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.legend-transfer::before {
+    content: '↔';
+    font-size: 1rem;
     color: #ffcc00;
-    margin-bottom: 10px;
+}
+
+.footer {
+    background-color: #111122;
+    padding: 12px 25px;
+    border-top: 1px solid #2a2a40;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.update-time {
+    color: #88bbff;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.update-time span {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.info {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.auto-refresh {
+    color: #88cc88;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.route-line {
+    animation: fadeIn 0.3s ease forwards;
 }
 
 /* Адаптивность */
-@media (max-width: 768px) {
-    .container {
-        border-radius: 0;
-        margin: 0;
-    }
-    
-    .header {
-        padding: 15px;
+@media (max-width: 1024px) {
+    .controls {
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
     
     .station-name {
-        font-size: 2rem;
-        text-align: center;
-    }
-    
-    .line-selector {
-        gap: 20px;
-    }
-    
-    .line-selection {
-        min-width: 100%;
-    }
-    
-    .departure-board {
-        padding: 15px;
-    }
-    
-    .departure-item {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
-        padding: 15px;
-    }
-    
-    .time {
-        min-width: auto;
         font-size: 1.8rem;
     }
     
-    .destination {
-        font-size: 1.3rem;
-        text-align: center;
+    .plan-board {
+        min-height: 500px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        font-size: 13px;
     }
     
-    .stops-list {
-        justify-content: center;
+    .container {
+        border-radius: 6px;
+    }
+    
+    .header {
+        padding: 12px 15px;
+    }
+    
+    .station-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .station-name {
+        font-size: 1.6rem;
+    }
+    
+    .line-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .control-group label {
+        font-size: 0.8rem;
+    }
+    
+    .plan-board {
+        min-height: 400px;
+    }
+    
+    .route-display {
+        padding: 15px;
+    }
+    
+    .line-header {
+        flex-wrap: wrap;
+    }
+    
+    .line-title {
+        font-size: 1.4rem;
+    }
+    
+    .line-direction {
+        font-size: 1.2rem;
+        margin-left: 0;
+        width: 100%;
+        order: 3;
+    }
+    
+    .stop-name {
+        font-size: 1.3rem;
+        padding: 6px 10px;
     }
     
     .footer {
         flex-direction: column;
-        gap: 10px;
         text-align: center;
+        gap: 8px;
     }
     
-    .shared-line-group {
+    .legend {
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .info {
         flex-direction: column;
-        gap: 15px;
-    }
-    
-    .shared-line-connector {
-        width: 4px;
-        height: 20px;
-        background: linear-gradient(180deg, 
-            var(--line1-color, #666) 0%, 
-            var(--line2-color, #999) 100%);
+        gap: 8px;
     }
 }
 
 @media (max-width: 480px) {
-    .departure-item {
-        flex-wrap: wrap;
+    .stops-container {
+        padding-left: 40px;
     }
     
-    .line-badge {
-        order: 1;
+    .line-track {
+        left: 25px;
+        width: 3px;
     }
     
-    .time {
-        order: 2;
+    .stop-marker {
+        left: -15px;
+        width: 10px;
+        height: 10px;
     }
     
-    .departure-info {
-        order: 3;
-        width: 100%;
-    }
-    
-    .platform {
-        order: 4;
-        margin-left: auto;
+    .shared-section {
+        margin-left: 40px;
+        padding-left: 15px;
     }
 }
