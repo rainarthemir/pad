@@ -78,9 +78,15 @@ body {
     box-shadow: 0 0 0 2px rgba(0, 153, 255, 0.3);
 }
 
+.line-selection option {
+    background-color: #1a1a2e;
+    color: white;
+}
+
 .departure-board {
     padding: 30px;
     background-color: #0a0a14;
+    min-height: 400px;
 }
 
 .departure-list {
@@ -99,6 +105,7 @@ body {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
+    animation: fadeIn 0.5s ease forwards;
 }
 
 .departure-item:hover {
@@ -117,51 +124,55 @@ body {
     font-size: 1.5rem;
     color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
 }
-
-.line-A { background: linear-gradient(135deg, #ff3b3b 0%, #cc0000 100%); }
-.line-B { background: linear-gradient(135deg, #3b8cff 0%, #0055cc 100%); }
-.line-C { background: linear-gradient(135deg, #ffcc00 0%, #cc9900 100%); }
-.line-D { background: linear-gradient(135deg, #00cc66 0%, #008844 100%); }
-.line-E { background: linear-gradient(135deg, #9966ff 0%, #6600cc 100%); }
 
 .departure-info {
     flex: 1;
+    min-width: 0;
 }
 
 .destination {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 5px;
     color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .time {
-    font-size: 2.2rem;
+    font-size: 2rem;
     font-weight: 700;
     color: #ffcc00;
     text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
     min-width: 120px;
     text-align: center;
+    flex-shrink: 0;
 }
 
 .stops-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
     margin-top: 10px;
     padding-top: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;
+    font-size: 0.9rem;
+    color: #aaccff;
 }
 
 .stop-item {
     background-color: rgba(255, 255, 255, 0.1);
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 4px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #cccccc;
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
 .stop-item:hover {
@@ -173,6 +184,9 @@ body {
     color: #aaccff;
     font-size: 0.9rem;
     margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .platform {
@@ -182,6 +196,7 @@ body {
     font-size: 0.9rem;
     color: #aaccff;
     border: 1px solid rgba(0, 85, 170, 0.5);
+    flex-shrink: 0;
 }
 
 .footer {
@@ -191,11 +206,14 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .update-time {
     color: #cccccc;
     font-size: 0.9rem;
+    white-space: nowrap;
 }
 
 .update-time span {
@@ -206,11 +224,18 @@ body {
 .station-id {
     color: #cccccc;
     font-size: 0.9rem;
+    white-space: nowrap;
 }
 
 .station-id span {
     color: #aaccff;
     font-weight: 500;
+}
+
+.data-info {
+    color: #88cc88;
+    font-size: 0.8rem;
+    font-style: italic;
 }
 
 /* Анимации */
@@ -225,8 +250,76 @@ body {
     }
 }
 
-.departure-item {
-    animation: fadeIn 0.5s ease forwards;
+/* Совместные линии */
+.shared-line-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.shared-line-connector {
+    width: 20px;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        var(--line1-color, #666) 0%, 
+        var(--line2-color, #999) 100%);
+    border-radius: 2px;
+}
+
+/* Состояние загрузки */
+.loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: #aaccff;
+}
+
+.loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left-color: #0099ff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Сообщения об ошибке */
+.error-message {
+    text-align: center;
+    padding: 40px 20px;
+    background: rgba(255, 107, 107, 0.1);
+    border-radius: 8px;
+    border: 2px solid #ff6b6b;
+    margin: 20px 0;
+}
+
+.error-message h3 {
+    color: #ff6b6b;
+    margin-bottom: 10px;
+}
+
+.error-message p {
+    color: #cccccc;
+    margin: 5px 0;
+}
+
+.no-departures {
+    text-align: center;
+    padding: 40px 20px;
+    background: rgba(255, 204, 0, 0.1);
+    border-radius: 8px;
+    border: 2px solid #ffcc00;
+}
+
+.no-departures h3 {
+    color: #ffcc00;
+    margin-bottom: 10px;
 }
 
 /* Адаптивность */
@@ -261,10 +354,21 @@ body {
         flex-direction: column;
         text-align: center;
         gap: 15px;
+        padding: 15px;
     }
     
     .time {
         min-width: auto;
+        font-size: 1.8rem;
+    }
+    
+    .destination {
+        font-size: 1.3rem;
+        text-align: center;
+    }
+    
+    .stops-list {
+        justify-content: center;
     }
     
     .footer {
@@ -272,75 +376,41 @@ body {
         gap: 10px;
         text-align: center;
     }
+    
+    .shared-line-group {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .shared-line-connector {
+        width: 4px;
+        height: 20px;
+        background: linear-gradient(180deg, 
+            var(--line1-color, #666) 0%, 
+            var(--line2-color, #999) 100%);
+    }
 }
 
-/* Совместные линии */
-.shared-line-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.shared-line-connector {
-    flex: 1;
-    height: 4px;
-    background: linear-gradient(90deg, 
-        var(--line1-color) 0%, 
-        var(--line1-color) 50%, 
-        var(--line2-color) 50%, 
-        var(--line2-color) 100%);
-    border-radius: 2px;
-    margin: 0 10px;
-}
-
-.shared-line-item {
-    flex: 1;
-}
-
-/* Состояние загрузки */
-.loading {
-    text-align: center;
-    padding: 40px;
-    color: #aaccff;
-}
-
-.loading-spinner {
-    border: 4px solid rgba(255, 255, 255, 0.1);
-    border-left-color: #0099ff;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Сообщения об ошибке */
-.error-message {
-    text-align: center;
-    padding: 40px;
-    background: rgba(255, 107, 107, 0.1);
-    border-radius: 8px;
-    border: 2px solid #ff6b6b;
-}
-
-.error-message h3 {
-    color: #ff6b6b;
-    margin-bottom: 10px;
-}
-
-/* Индикатор обновления */
-.updating::after {
-    content: '🔄';
-    margin-left: 10px;
-    animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+@media (max-width: 480px) {
+    .departure-item {
+        flex-wrap: wrap;
+    }
+    
+    .line-badge {
+        order: 1;
+    }
+    
+    .time {
+        order: 2;
+    }
+    
+    .departure-info {
+        order: 3;
+        width: 100%;
+    }
+    
+    .platform {
+        order: 4;
+        margin-left: auto;
+    }
 }
