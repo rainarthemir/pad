@@ -13,9 +13,10 @@
             <div class="search-container">
                 <input type="text" id="stopSearch" placeholder="Enter stop ID or name...">
                 <button id="searchBtn"><i class="fas fa-search"></i></button>
+                <button id="demoBtn" class="demo-btn"><i class="fas fa-play"></i> Demo</button>
             </div>
             <div class="url-info">
-                <p>Or use URL: <code>https://yourdomain.com/?id=<span class="stop-id-example">YOUR_STOP_ID</span></code></p>
+                <p>Use URL: <code>https://yourusername.github.io/repo/?id=<span class="stop-id-example">STOP_ID</span></code></p>
             </div>
         </header>
 
@@ -24,7 +25,7 @@
                 <div class="pad-header">
                     <div class="line-info">
                         <span class="line-name" id="lineName">--</span>
-                        <span class="line-direction" id="lineDirection">--</span>
+                        <span class="line-direction" id="lineDirection">Select a stop</span>
                     </div>
                     <div class="time-info">
                         <span id="currentTime">--:--</span>
@@ -34,8 +35,11 @@
                 
                 <div class="stations-container">
                     <div class="stations-track" id="stationsTrack">
-                        <!-- Stations will be dynamically added here -->
-                        <div class="loading-stations">Loading stations...</div>
+                        <div class="welcome-message">
+                            <h3><i class="fas fa-train"></i> GTFS PAD Display</h3>
+                            <p>Enter a stop ID or name to view real-time departure information</p>
+                            <p>Or click <strong>Demo</strong> button to see example data</p>
+                        </div>
                     </div>
                 </div>
                 
@@ -45,7 +49,7 @@
                         <span class="dest-name" id="destinationName">--</span>
                     </div>
                     <div class="update-info">
-                        <span id="updateStatus">Last update: --:--</span>
+                        <span id="updateStatus">Ready</span>
                         <button id="refreshBtn" class="refresh-btn"><i class="fas fa-sync-alt"></i></button>
                     </div>
                 </div>
@@ -56,21 +60,29 @@
                 <div class="info-content">
                     <p><strong>Current Stop:</strong> <span id="currentStopInfo">--</span></p>
                     <p><strong>Available Directions:</strong> <span id="directionsCount">0</span></p>
-                    <p><strong>Next Train In:</strong> <span id="nextTrainMinutes">--</span> minutes</p>
+                    <p><strong>Next Train In:</strong> <span id="nextTrainMinutes">--</span> min</p>
                     <p><strong>Following Trains:</strong></p>
                     <ul id="followingTrains">
-                        <li>No upcoming trains</li>
+                        <li>No data</li>
                     </ul>
+                    <div class="gtfs-info">
+                        <p><strong>GTFS Files Loaded:</strong></p>
+                        <div id="gtfsStatus">Loading...</div>
+                    </div>
                 </div>
             </div>
         </main>
         
         <footer class="footer">
-            <p>GTFS PAD Display System | Real-time transit information</p>
+            <p>GTFS PAD Display | Works on GitHub Pages | <a href="#" id="viewSource">View Source</a></p>
             <p class="clock" id="liveClock">--:--:--</p>
         </footer>
     </div>
 
+    <!-- Demo Data Script -->
+    <script src="demo-data.js"></script>
+    
+    <!-- Main App Script -->
     <script src="script.js"></script>
 </body>
 </html>
