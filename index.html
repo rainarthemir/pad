@@ -137,7 +137,9 @@ class UnifiedRER {
     for(const [tid, arr] of this.data.stopTimes) arr.sort((a,b)=> (a.sequence||0)-(b.sequence||0));
   }
 
-  parseFile(name,text){ if(!text) return; const rows = text.trim().split(/\r?\n/); if(rows.length<2) return; const headers = rows[0].split(',').map(h=>h.trim()); for(let i=1;i<rows.length;i++){ const line = rows[i]; if(!line) continue; const vals = line.split(',').map(v=>v.trim()); const row = {}; headers.forEach((h,idx)=> row[h]= vals[idx] ?? ''); this.processRow(name,row); } }
+  parseFile(name,text){ if(!text) return; const rows = text.trim().split(/
+?
+/); if(rows.length<2) return; const headers = rows[0].split(',').map(h=>h.trim()); for(let i=1;i<rows.length;i++){ const line = rows[i]; if(!line) continue; const vals = line.split(',').map(v=>v.trim()); const row = {}; headers.forEach((h,idx)=> row[h]= vals[idx] ?? ''); this.processRow(name,row); } }
 
   processRow(name,row){ switch(name){
     case 'stops': if(row.stop_id && row.stop_name) this.data.stops.set(row.stop_id,{id:row.stop_id,name:row.stop_name}); break;
