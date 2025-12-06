@@ -34,10 +34,12 @@ body {
     display: flex;
     gap: 10px;
     margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
 #stopSearch {
     flex: 1;
+    min-width: 200px;
     padding: 15px 20px;
     border: none;
     border-radius: 10px;
@@ -57,20 +59,31 @@ body {
     color: rgba(255, 255, 255, 0.6);
 }
 
-#searchBtn {
-    padding: 0 30px;
+#searchBtn, .demo-btn {
+    padding: 0 25px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
 }
 
-#searchBtn:hover {
+#searchBtn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.demo-btn {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+#searchBtn:hover, .demo-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
 .url-info {
@@ -90,6 +103,12 @@ body {
     gap: 20px;
 }
 
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* PAD Display */
 .pad-display {
     background: rgba(0, 0, 0, 0.7);
@@ -99,6 +118,7 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
+    min-height: 400px;
 }
 
 .pad-header {
@@ -108,12 +128,15 @@ body {
     justify-content: space-between;
     align-items: center;
     border-bottom: 2px solid #667eea;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .line-info {
     display: flex;
     align-items: center;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
 .line-name {
@@ -156,7 +179,8 @@ body {
     padding: 30px 20px;
     background: rgba(26, 32, 44, 0.9);
     overflow-x: auto;
-    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .stations-track {
@@ -164,6 +188,25 @@ body {
     min-width: min-content;
     position: relative;
     padding: 20px 0;
+    flex-wrap: nowrap;
+}
+
+.welcome-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #a0aec0;
+    width: 100%;
+}
+
+.welcome-message h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.welcome-message p {
+    margin-bottom: 10px;
+    font-size: 16px;
 }
 
 .station {
@@ -249,12 +292,17 @@ body {
     margin-top: 5px;
 }
 
-.loading-stations {
+/* Loading and Error States */
+.loading, .error, .no-data {
     text-align: center;
     padding: 40px;
     color: #a0aec0;
     font-size: 18px;
     width: 100%;
+}
+
+.error {
+    color: #f56565;
 }
 
 /* PAD Footer */
@@ -265,6 +313,8 @@ body {
     justify-content: space-between;
     align-items: center;
     border-top: 2px solid #4a5568;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .destination-info {
@@ -293,6 +343,7 @@ body {
 #updateStatus {
     color: #a0aec0;
     font-size: 14px;
+    min-width: 120px;
 }
 
 .refresh-btn {
@@ -352,6 +403,8 @@ body {
 #followingTrains {
     list-style: none;
     margin-top: 10px;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 #followingTrains li {
@@ -360,6 +413,21 @@ body {
     margin-bottom: 5px;
     border-radius: 6px;
     border-left: 3px solid #4299e1;
+    font-size: 14px;
+}
+
+.gtfs-info {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#gtfsStatus {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 14px;
+    color: #a0aec0;
 }
 
 /* Footer */
@@ -373,6 +441,17 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.footer a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
 }
 
 .clock {
@@ -380,39 +459,6 @@ body {
     font-weight: bold;
     color: #fbbf24;
     font-family: 'Courier New', monospace;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .main-content {
-        grid-template-columns: 1fr;
-    }
-    
-    .station {
-        min-width: 160px;
-    }
-}
-
-@media (max-width: 768px) {
-    .pad-header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-    }
-    
-    .time-info {
-        align-items: center;
-    }
-    
-    .footer {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .station {
-        min-width: 140px;
-        padding: 15px 10px;
-    }
 }
 
 /* Animation for station highlight */
@@ -424,4 +470,42 @@ body {
 
 .station.current {
     animation: pulse 2s infinite;
-} 
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .pad-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .time-info {
+        align-items: flex-start;
+    }
+    
+    .station {
+        min-width: 150px;
+        padding: 15px 10px;
+    }
+    
+    .footer {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-container {
+        flex-direction: column;
+    }
+    
+    #stopSearch, #searchBtn, .demo-btn {
+        width: 100%;
+    }
+    
+    .station {
+        min-width: 130px;
+        margin: 0 5px;
+    }
+}
