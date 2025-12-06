@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>RER Display — Modern</title>
+<title>RER Display — Modern (shared sections)</title>
 <style>
   :root{
     --bg:#0b0b0c;
@@ -17,248 +17,40 @@
     --radius:10px;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   }
-
-  html,body{
-    height:100%;
-    margin:0;
-    background: linear-gradient(180deg,#050607 0%, #0b0b0c 100%);
-    color:var(--text);
-  }
-
-  .app {
-    max-width:1200px;
-    margin:18px auto;
-    padding:18px;
-    display:flex;
-    gap:18px;
-    box-sizing:border-box;
-  }
-
-  .header {
-    display:flex;
-    justify-content:space-between;
-    align-items:end;
-    gap:12px;
-    margin-bottom:12px;
-  }
-
-  .station-info {
-    background:transparent;
-  }
-
-  #station-name {
-    font-size:22px;
-    font-weight:700;
-    letter-spacing:0.6px;
-  }
-  .meta {
-    color:var(--muted);
-    font-size:13px;
-  }
-
-  .controls {
-    display:flex;
-    gap:8px;
-    align-items:center;
-  }
-
-  select {
-    background:var(--panel);
-    color:var(--text);
-    border:1px solid rgba(255,255,255,0.03);
-    padding:8px 10px;
-    border-radius:8px;
-    font-size:14px;
-  }
-
-  .container {
-    display:grid;
-    grid-template-columns: 1fr 420px;
-    gap:18px;
-    width:100%;
-  }
-
-  /* Left panel: line map */
-  .panel {
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:var(--radius);
-    padding:18px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-    min-height:260px;
-  }
-
-  .line-wrap {
-    display:flex;
-    gap:18px;
-    align-items:flex-start;
-  }
-
-  .line-rail {
-    flex:1;
-    position:relative;
-    padding:14px 6px;
-    overflow:auto;
-    -webkit-overflow-scrolling:touch;
-  }
-
-  /* The line track */
-  .track {
-    height:8px;
-    border-radius:999px;
-    background:linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-    position:relative;
-    margin:24px 0 24px 0;
-  }
-
-  .track .segment {
-    position:absolute;
-    height:100%;
-    left:0;
-    top:0;
-    border-radius:999px;
-  }
-
-  .stops {
-    display:flex;
-    gap:22px;
-    align-items:center;
-    padding: 8px 4px;
-    flex-wrap:nowrap;
-  }
-
-  .stop {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    width:160px; /* determines spacing */
-    min-width:120px;
-    text-align:center;
-  }
-
-  .stop-marker {
-    width:22px;
-    height:22px;
-    border-radius:50%;
-    background:rgba(255,255,255,0.06);
-    border:2px solid rgba(255,255,255,0.06);
-    box-sizing:border-box;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#000;
-    font-weight:700;
-    margin-bottom:8px;
-  }
-
-  .stop-name {
-    font-size:12px;
-    line-height:1.1;
-    color:var(--muted);
-    max-height:34px;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-
+  html,body{height:100%;margin:0;background: linear-gradient(180deg,#050607 0%, #0b0b0c 100%);color:var(--text);}
+  .app { max-width:1200px;margin:18px auto;padding:18px;display:flex;gap:18px;box-sizing:border-box;}
+  .header { display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:12px;}
+  .station-info { background:transparent; }
+  #station-name { font-size:22px;font-weight:700;letter-spacing:0.6px; }
+  .meta { color:var(--muted);font-size:13px; }
+  .controls { display:flex; gap:8px; align-items:center; }
+  select { background:var(--panel); color:var(--text); border:1px solid rgba(255,255,255,0.03); padding:8px 10px; border-radius:8px; font-size:14px; }
+  .container { display:grid; grid-template-columns: 1fr 420px; gap:18px; width:100%; }
+  .panel { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:var(--radius); padding:18px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); min-height:260px; }
+  .line-wrap { display:flex; gap:18px; align-items:flex-start; flex-direction:column; }
+  .line-rail { flex:1; position:relative; padding:14px 6px; overflow:auto; -webkit-overflow-scrolling:touch; }
+  .track { height:8px; border-radius:999px; background:linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); position:relative; margin:24px 0 24px 0; }
+  .track .segment { position:absolute; height:100%; left:0; top:0; border-radius:999px; }
+  .stops { display:flex; gap:22px; align-items:center; padding: 8px 4px; flex-wrap:nowrap; }
+  .stop { display:flex; flex-direction:column; align-items:center; width:160px; min-width:120px; text-align:center; }
+  .stop-marker { width:22px; height:22px; border-radius:50%; background:rgba(255,255,255,0.06); border:2px solid rgba(255,255,255,0.06); box-sizing:border-box; display:flex; align-items:center; justify-content:center; color:#000; font-weight:700; margin-bottom:8px; }
+  .stop-name { font-size:12px; line-height:1.1; color:var(--muted); max-height:34px; overflow:hidden; text-overflow:ellipsis; }
   .stop-name.big { font-size:13px; color:var(--text); }
-
-  .stop-marker.next {
-    background:var(--accent);
-    border-color:rgba(255,255,255,0.12);
-    box-shadow:0 6px 18px rgba(255,59,48,0.18);
-    color:white;
-  }
-
-  .stop-marker.current {
-    width:28px; height:28px;
-    background:white;
-    border:3px solid rgba(0,0,0,0.2);
-    box-shadow:0 8px 24px rgba(0,0,0,0.4);
-  }
-
-  .stop-marker.inactive {
-    opacity:0.35;
-    transform:scale(0.92);
-    background:rgba(255,255,255,0.02);
-  }
-
-  /* Right panel: detailed next stops */
-  .panel-right {
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-  }
-
-  .card {
-    background:linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.01));
-    padding:12px;
-    border-radius:10px;
-    border:1px solid rgba(255,255,255,0.02);
-  }
-
-  .big-time {
-    font-size:28px;
-    font-weight:700;
-    color:var(--text);
-  }
-
-  .next-list {
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    margin-top:8px;
-  }
-
-  .next-item {
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:6px 8px;
-    border-radius:8px;
-    background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
-  }
-
-  .pill {
-    min-width:44px;
-    padding:6px 10px;
-    border-radius:999px;
-    font-weight:700;
-    text-align:center;
-    color:#fff;
-  }
-
-  .next-meta {
-    flex:1;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:8px;
-  }
-
-  .next-meta .name {
-    font-size:14px;
-    color:var(--text);
-  }
-
-  .next-meta .sub {
-    color:var(--muted);
-    font-size:12px;
-  }
-
-  .shared-section {
-    margin-top:12px;
-  }
-
-  .no-data {
-    padding:30px;
-    text-align:center;
-    color:var(--muted);
-  }
-
-  /* small responsive tweaks */
-  @media (max-width:1000px){
-    .container { grid-template-columns: 1fr; }
-    .stop { width:140px; min-width:100px; }
-  }
+  .stop-marker.next { background:var(--accent); border-color:rgba(255,255,255,0.12); box-shadow:0 6px 18px rgba(255,59,48,0.18); color:white; }
+  .stop-marker.current { width:28px; height:28px; background:white; border:3px solid rgba(0,0,0,0.2); box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+  .stop-marker.inactive { opacity:0.35; transform:scale(0.92); background:rgba(255,255,255,0.02); }
+  .panel-right { display:flex; flex-direction:column; gap:12px; }
+  .card { background:linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.01)); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.02); }
+  .big-time { font-size:28px; font-weight:700; color:var(--text); }
+  .next-list { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+  .next-item { display:flex; align-items:center; gap:12px; padding:6px 8px; border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent); }
+  .pill { min-width:44px; padding:6px 10px; border-radius:999px; font-weight:700; text-align:center; color:#fff; }
+  .next-meta { flex:1; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .next-meta .name { font-size:14px; color:var(--text); }
+  .next-meta .sub { color:var(--muted); font-size:12px; }
+  .shared-section { margin-top:12px; }
+  .no-data { padding:30px; text-align:center; color:var(--muted); }
+  @media (max-width:1000px){ .container { grid-template-columns: 1fr; } .stop { width:140px; min-width:100px; } }
 </style>
 </head>
 <body>
@@ -288,10 +80,8 @@
 
     <div class="container">
       <div class="panel">
-        <div class="line-wrap">
-          <div class="line-rail" id="scheme-container">
-            <!-- Left: visual map inserted here -->
-          </div>
+        <div class="line-wrap" id="line-wrap">
+          <!-- sections will be injected here: shared + branches -->
         </div>
       </div>
 
@@ -311,7 +101,6 @@
           <div style="margin-top:12px;">
             <div class="meta">Prochains trains</div>
             <div class="next-list" id="next-list">
-              <!-- Next trains populated here -->
             </div>
           </div>
         </div>
@@ -327,7 +116,7 @@
 </div>
 
 <script>
-/* Modernized RERDisplay — uses your existing data structures and GTFS colors */
+/* RERDisplay v2 — shows stops from current and merges shared starting sections */
 class RERDisplay {
   constructor() {
     this.data = {
@@ -345,17 +134,16 @@ class RERDisplay {
   }
 
   async init() {
-    console.log('RERDisplay init');
+    console.log('RERDisplay init (v2)');
     this.updateCurrentTime();
     try {
       await this.loadData();
       this.updateStationInfo();
       this.setupControls();
-      this.renderDisplay();
-
+      this.renderAll();
       setInterval(()=>this.updateCurrentTime(), 1000);
       setInterval(()=>this.updateTimestamp(), 1000);
-      setInterval(()=>this.renderDisplay(), 5000);
+      setInterval(()=>this.renderAll(), 5000);
     } catch(e){
       console.error(e);
       this.showError('Impossible de charger les données');
@@ -368,7 +156,6 @@ class RERDisplay {
   }
 
   async loadData(){
-    // try loading gtfs files; fallback to demo if none present
     const files = ['stops','routes','trips','stop_times'];
     let anyLoaded = false;
     for(const f of files){
@@ -400,7 +187,6 @@ class RERDisplay {
     for(let i=1;i<lines.length;i++){
       const raw = lines[i];
       if(!raw) continue;
-      // naive CSV split (works for simple GTFS without quoted commas)
       const vals = raw.split(',').map(v=>v.trim());
       const row = {};
       headers.forEach((h,idx)=>{ row[h]= vals[idx] ?? ''; });
@@ -412,16 +198,11 @@ class RERDisplay {
     switch(fileName){
       case 'stops':
         if(row.stop_id && row.stop_name){
-          this.data.stops.set(row.stop_id, {
-            id: row.stop_id,
-            name: row.stop_name.toUpperCase(),
-            code: row.stop_code || ''
-          });
+          this.data.stops.set(row.stop_id, { id: row.stop_id, name: row.stop_name.toUpperCase(), code: row.stop_code || '' });
         }
         break;
       case 'routes':
         if(row.route_id){
-          // keep provided color when present (route_color), else fallback
           const color = row.route_color ? ('#' + row.route_color.replace('#','')) : null;
           this.data.routes.set(row.route_id, {
             id: row.route_id,
@@ -458,7 +239,6 @@ class RERDisplay {
   }
 
   loadDemoData(){
-    // same demo used previously (kept for offline)
     const demoStops = [
       {id: '8775860', name: 'GARE DE LYON RER'},
       {id: '8775861', name: 'CHATELET - LES HALLES'},
@@ -490,24 +270,20 @@ class RERDisplay {
     ];
     const demoStopTimes = {
       'T1': [
-        {tripId:'T1', stopId:'8775869', sequence:1},
-        {tripId:'T1', stopId:'8775868', sequence:2},
-        {tripId:'T1', stopId:'8775867', sequence:3},
-        {tripId:'T1', stopId:'8775866', sequence:4},
-        {tripId:'T1', stopId:'8775865', sequence:5},
-        {tripId:'T1', stopId:'8775864', sequence:6},
-        {tripId:'T1', stopId:'8775863', sequence:7},
-        {tripId:'T1', stopId:'8775862', sequence:8},
-        {tripId:'T1', stopId:'8775861', sequence:9},
-        {tripId:'T1', stopId:'8775860', sequence:10}
+        {tripId:'T1', stopId:'8775860', sequence:1},
+        {tripId:'T1', stopId:'8775861', sequence:2},
+        {tripId:'T1', stopId:'8775862', sequence:3},
+        {tripId:'T1', stopId:'8775863', sequence:4},
+        {tripId:'T1', stopId:'8775864', sequence:5},
+        {tripId:'T1', stopId:'8775865', sequence:6},
+        {tripId:'T1', stopId:'8775866', sequence:7}
       ],
       'T2': [
-        {tripId:'T2', stopId:'8775874', sequence:1},
-        {tripId:'T2', stopId:'8775873', sequence:2},
-        {tripId:'T2', stopId:'8775872', sequence:3},
-        {tripId:'T2', stopId:'8775871', sequence:4},
-        {tripId:'T2', stopId:'8775861', sequence:5},
-        {tripId:'T2', stopId:'8775860', sequence:6}
+        {tripId:'T2', stopId:'8775860', sequence:1},
+        {tripId:'T2', stopId:'8775861', sequence:2},
+        {tripId:'T2', stopId:'8775871', sequence:3},
+        {tripId:'T2', stopId:'8775872', sequence:4},
+        {tripId:'T2', stopId:'8775873', sequence:5}
       ],
       'T3': [
         {tripId:'T3', stopId:'8775860', sequence:1},
@@ -523,7 +299,6 @@ class RERDisplay {
         {tripId:'T4', stopId:'8775871', sequence:4}
       ]
     };
-
     demoStops.forEach(s=>this.data.stops.set(s.id,s));
     demoRoutes.forEach(r=>this.data.routes.set(r.id,r));
     demoTrips.forEach(t=>this.data.trips.set(t.id,t));
@@ -557,31 +332,15 @@ class RERDisplay {
     const routes = Array.from(this.data.routes.values()).sort((a,b)=> a.shortName.localeCompare(b.shortName));
     const line1Select = document.getElementById('line1');
     const line2Select = document.getElementById('line2');
-
-    // empty default
-    [line1Select, line2Select].forEach(s=>{
-      s.innerHTML = '<option value="">-- Aucune --</option>';
-    });
-
+    [line1Select, line2Select].forEach(s=> s.innerHTML = '<option value="">-- Aucune --</option>');
     routes.forEach(route=>{
-      const opt1 = document.createElement('option');
-      opt1.value = route.id;
-      opt1.textContent = `RER ${route.shortName} — ${route.longName}`;
-      line1Select.appendChild(opt1);
-
-      const opt2 = opt1.cloneNode(true);
-      line2Select.appendChild(opt2);
+      const opt1 = document.createElement('option'); opt1.value = route.id; opt1.textContent = `RER ${route.shortName} — ${route.longName}`; line1Select.appendChild(opt1);
+      const opt2 = opt1.cloneNode(true); line2Select.appendChild(opt2);
     });
-
-    // default select A and B if present
-    const defaultA = routes.find(r=>r.shortName==='A');
-    const defaultB = routes.find(r=>r.shortName==='B');
+    const defaultA = routes.find(r=>r.shortName==='A'); const defaultB = routes.find(r=>r.shortName==='B');
     if(defaultA){ line1Select.value = defaultA.id; this.selectedLines.line1 = defaultA.id; }
     if(defaultB){ line2Select.value = defaultB.id; this.selectedLines.line2 = defaultB.id; }
-
-    // trigger initial direction populate
-    this.onLineChange('line1');
-    this.onLineChange('line2');
+    this.onLineChange('line1'); this.onLineChange('line2');
   }
 
   setupEventListeners(){
@@ -593,14 +352,13 @@ class RERDisplay {
       this.selectedLines.line2 = document.getElementById('line2').value;
       this.onLineChange('line2');
     });
-
     document.getElementById('direction1').addEventListener('change', ()=>{
       this.selectedDirections.line1 = document.getElementById('direction1').value;
-      this.renderDisplay();
+      this.renderAll();
     });
     document.getElementById('direction2').addEventListener('change', ()=>{
       this.selectedDirections.line2 = document.getElementById('direction2').value;
-      this.renderDisplay();
+      this.renderAll();
     });
   }
 
@@ -609,23 +367,15 @@ class RERDisplay {
     const dirSelect = document.getElementById(lineKey.replace('line','direction'));
     dirSelect.innerHTML = '<option value="">-- Toutes directions --</option>';
     this.selectedDirections[lineKey] = null;
-
     const routeId = select.value;
-    if(!routeId){ this.selectedLines[lineKey] = null; this.renderDisplay(); return; }
+    if(!routeId){ this.selectedLines[lineKey] = null; this.renderAll(); return; }
     this.selectedLines[lineKey] = routeId;
-
     const directions = this.getDirectionsForRoute(routeId);
     directions.forEach(d=>{
-      const opt = document.createElement('option');
-      opt.value = d.id;
-      opt.textContent = d.name;
-      dirSelect.appendChild(opt);
+      const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.name; dirSelect.appendChild(opt);
     });
-    if(directions.length>0){
-      dirSelect.value = directions[0].id;
-      this.selectedDirections[lineKey] = directions[0].id;
-    }
-    this.renderDisplay();
+    if(directions.length>0){ dirSelect.value = directions[0].id; this.selectedDirections[lineKey] = directions[0].id; }
+    this.renderAll();
   }
 
   getDirectionsForRoute(routeId){
@@ -643,14 +393,13 @@ class RERDisplay {
     return Array.from(directions.values()).sort((a,b)=> a.id - b.id);
   }
 
-  // New helper: get full sequence of stops for a route+direction that includes currentStop
+  // return full sequence for one trip that includes current stop, sorted by sequence
   getFullSequence(routeId, directionId){
     for(const [tid, trip] of this.data.trips){
       if(trip.routeId === routeId){
-        if(directionId !== null && directionId !== undefined && directionId !== '' && trip.directionId.toString() !== directionId.toString()) continue;
+        if(directionId !== null && directionId !== '' && trip.directionId.toString() !== directionId.toString()) continue;
         const seq = (this.data.stopTimes.get(tid) || []).slice().sort((a,b)=> a.sequence - b.sequence);
-        if(seq.some(s=> s.stopId === this.currentStopId)) {
-          // return mapped stops with full info
+        if(seq.some(s=> s.stopId === this.currentStopId)){
           return seq.map(st => {
             const stop = this.data.stops.get(st.stopId) || {id:st.stopId, name: st.stopId};
             return { id: st.stopId, name: stop.name || st.stopId, sequence: st.sequence };
@@ -661,41 +410,80 @@ class RERDisplay {
     return [];
   }
 
-  // get stops AFTER current stop (including the current marker)
-  getStopsAfterCurrent(routeId, directionId){
+  // Return stops from CURRENT (inclusive) and onward
+  getStopsFromCurrent(routeId, directionId){
     const full = this.getFullSequence(routeId, directionId);
     if(!full || full.length===0) return [];
     const idx = full.findIndex(s=> s.id === this.currentStopId);
-    if(idx === -1) return full; // fallback
-    // show from current to end
-    return full.slice(idx+1).map((s,i)=> ({...s, isNext: i===0}));
+    if(idx === -1) return [];
+    // include current at index idx, and all subsequent stops
+    return full.slice(idx).map((s,i)=> ({...s, isCurrent: i===0, isNext: i===1}));
   }
 
-  renderDisplay(){
-    const container = document.getElementById('scheme-container');
-    container.innerHTML = '';
+  // compute shared prefix of two stop arrays (compares by id)
+  computeSharedPrefix(stopsA, stopsB){
+    const shared = [];
+    const max = Math.min(stopsA.length, stopsB.length);
+    for(let i=0;i<max;i++){
+      if(stopsA[i].id === stopsB[i].id) shared.push(stopsA[i]);
+      else break;
+    }
+    return shared;
+  }
 
-    const line1Data = this.buildLineRender('line1');
-    const line2Data = this.buildLineRender('line2');
+  renderAll(){
+    const wrap = document.getElementById('line-wrap');
+    wrap.innerHTML = '';
 
-    if(!line1Data && !line2Data){
-      container.innerHTML = `<div class="no-data">Sélectionnez au moins une ligne</div>`;
+    const leftLine = this.buildLineData('line1');
+    const rightLine = this.buildLineData('line2');
+
+    if(!leftLine && !rightLine){
+      wrap.innerHTML = `<div class="no-data">Sélectionnez au moins une ligne</div>`;
       document.getElementById('next-list').innerHTML = '';
       document.getElementById('shared-section').style.display = 'none';
       return;
     }
 
-    // If both, show both stacks
-    if(line1Data){
-      container.appendChild(this.createLineElement(line1Data, 'line1'));
-    }
-    if(line2Data){
-      container.appendChild(this.createLineElement(line2Data, 'line2'));
+    // If both exist, find shared prefix
+    if(leftLine && rightLine){
+      const shared = this.computeSharedPrefix(leftLine.stopsFromCurrent, rightLine.stopsFromCurrent);
+      if(shared.length > 0){
+        // render shared section once
+        wrap.appendChild(this.createSharedSectionElement(shared, leftLine.route.color, rightLine.route.color, leftLine.route, rightLine.route));
+        // render branches: for each line, its unique tail after shared length
+        const tailA = leftLine.stopsFromCurrent.slice(shared.length);
+        const tailB = rightLine.stopsFromCurrent.slice(shared.length);
+        if(tailA.length) wrap.appendChild(this.createBranchSection(leftLine.route, leftLine, tailA));
+        if(tailB.length) wrap.appendChild(this.createBranchSection(rightLine.route, rightLine, tailB));
+      } else {
+        // no shared — render both full (from current)
+        wrap.appendChild(this.createBranchSection(leftLine.route, leftLine, leftLine.stopsFromCurrent));
+        wrap.appendChild(this.createBranchSection(rightLine.route, rightLine, rightLine.stopsFromCurrent));
+      }
+    } else {
+      // only one line selected
+      const only = leftLine || rightLine;
+      wrap.appendChild(this.createBranchSection(only.route, only, only.stopsFromCurrent));
     }
 
-    // Shared stops
-    if(line1Data && line2Data){
-      const shared = this.findSharedStops(line1Data.fullStops, line2Data.fullStops);
+    // populate right panel "next trains" using both lines
+    const combined = [];
+    if(leftLine) combined.push(...this.mapNextItemsForPanel(leftLine));
+    if(rightLine) combined.push(...this.mapNextItemsForPanel(rightLine));
+    const nextListEl = document.getElementById('next-list');
+    nextListEl.innerHTML = '';
+    combined.slice(0,6).forEach(item=>{
+      const div = document.createElement('div'); div.className = 'next-item';
+      const pill = document.createElement('div'); pill.className = 'pill'; pill.style.background = item.color; pill.textContent = item.routeShort;
+      const meta = document.createElement('div'); meta.className = 'next-meta';
+      meta.innerHTML = `<div><div class="name">${item.stopName}</div><div class="sub">${item.directionName}</div></div><div class="meta">${item.note || '—'}</div>`;
+      div.appendChild(pill); div.appendChild(meta); nextListEl.appendChild(div);
+    });
+
+    // shared-section text (for accessibility)
+    if(leftLine && rightLine){
+      const shared = this.computeSharedPrefix(leftLine.stopsFromCurrent, rightLine.stopsFromCurrent);
       if(shared.length){
         document.getElementById('shared-section').style.display = 'block';
         document.getElementById('shared-stops').textContent = shared.map(s=>s.name).join(' • ');
@@ -705,140 +493,102 @@ class RERDisplay {
     } else {
       document.getElementById('shared-section').style.display = 'none';
     }
-
-    // Right panel: combine next trains from both lines (top 5)
-    const combinedNext = [];
-    if(line1Data) {
-      combinedNext.push(...this.mapNextItemsForPanel(line1Data));
-    }
-    if(line2Data) {
-      combinedNext.push(...this.mapNextItemsForPanel(line2Data));
-    }
-
-    // limit & sort (we don't have real times, so prefer next logical order)
-    const nextListEl = document.getElementById('next-list');
-    nextListEl.innerHTML = '';
-    combinedNext.slice(0,6).forEach(item=>{
-      const div = document.createElement('div');
-      div.className = 'next-item';
-      const pill = document.createElement('div');
-      pill.className = 'pill';
-      pill.style.background = item.color;
-      pill.textContent = item.routeShort;
-      const meta = document.createElement('div');
-      meta.className = 'next-meta';
-      meta.innerHTML = `<div><div class="name">${item.stopName}</div><div class="sub">${item.directionName}</div></div><div class="meta">${item.note || '—'}</div>`;
-      div.appendChild(pill);
-      div.appendChild(meta);
-      nextListEl.appendChild(div);
-    });
   }
 
-  buildLineRender(lineKey){
+  buildLineData(lineKey){
     const routeId = this.selectedLines[lineKey];
     if(!routeId) return null;
     const route = this.data.routes.get(routeId);
     if(!route) return null;
     const directionId = this.selectedDirections[lineKey];
-    const fullStops = this.getFullSequence(routeId, directionId);
-    if(!fullStops || fullStops.length===0) return null;
-    const stopsAfter = this.getStopsAfterCurrent(routeId, directionId); // next to terminus
-    return {
-      route,
-      fullStops,
-      stopsAfter,
-      directionId
-    };
+    const stopsFromCurrent = this.getStopsFromCurrent(routeId, directionId);
+    if(!stopsFromCurrent || stopsFromCurrent.length===0) return null;
+    return { route, directionId, stopsFromCurrent };
   }
 
-  createLineElement(lineData, key){
+  // create the shared section element (route colors combined)
+  createSharedSectionElement(sharedStops, colorA, colorB, routeA, routeB){
     const wrapper = document.createElement('div');
-    wrapper.style.marginBottom = '18px';
-
-    // header
+    wrapper.style.marginBottom = '16px';
     const header = document.createElement('div');
-    header.style.display='flex';
-    header.style.justifyContent='space-between';
-    header.style.alignItems='center';
-    header.style.marginBottom='8px';
+    header.style.display='flex'; header.style.justifyContent='space-between'; header.style.alignItems='center'; header.style.marginBottom='8px';
     header.innerHTML = `
       <div style="display:flex;gap:12px;align-items:center;">
-        <div style="width:44px;height:44px;border-radius:8px;background:${lineData.route.color};display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff">${lineData.route.shortName}</div>
+        <div style="width:44px;height:44px;border-radius:8px;background:linear-gradient(90deg, ${colorA} 0%, ${colorB} 100%);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff">${routeA.shortName}/${routeB.shortName}</div>
         <div>
-          <div style="font-weight:700">${lineData.route.longName}</div>
-          <div style="font-size:12px;color:var(--muted)">${lineData.route.id} · ${lineData.fullStops.length} stations</div>
+          <div style="font-weight:700">SECTION COMMUNE</div>
+          <div style="font-size:12px;color:var(--muted)">${sharedStops.length} stations</div>
         </div>
       </div>
-      <div style="color:var(--muted);font-size:12px">Direction: ${ this.getDirectionLabel(lineData) }</div>
+      <div style="color:var(--muted);font-size:12px">Lignes: ${routeA.shortName} & ${routeB.shortName}</div>
     `;
     wrapper.appendChild(header);
 
-    // track and stops
-    const track = document.createElement('div');
-    track.className = 'track';
-    // track color segment covers whole width but with gradient to show route color
-    const seg = document.createElement('div');
-    seg.className = 'segment';
-    seg.style.background = lineData.route.color;
-    seg.style.opacity = 0.9;
-    seg.style.width = '100%';
+    const track = document.createElement('div'); track.className='track';
+    const seg = document.createElement('div'); seg.className='segment';
+    seg.style.width='100%';
+    seg.style.background = `linear-gradient(90deg, ${colorA} 0%, ${colorB} 100%)`;
     track.appendChild(seg);
+    wrapper.appendChild(track);
 
-    const stopsRow = document.createElement('div');
-    stopsRow.className = 'stops';
-
-    // mark current stop in fullStops
-    const full = lineData.fullStops;
-    // we want to display from start -> end, but visually highlight current and upcoming
-    full.forEach((s, idx)=>{
-      const stopEl = document.createElement('div');
-      stopEl.className = 'stop';
-      const marker = document.createElement('div');
-      marker.className = 'stop-marker';
-      const name = document.createElement('div');
-      name.className = 'stop-name';
-
+    const stopsRow = document.createElement('div'); stopsRow.className='stops';
+    sharedStops.forEach((s,idx)=>{
+      const stopEl = document.createElement('div'); stopEl.className='stop';
+      const marker = document.createElement('div'); marker.className='stop-marker';
+      const name = document.createElement('div'); name.className='stop-name';
       name.textContent = s.name;
-      // identify current and next
-      if(s.id === this.currentStopId){
-        marker.classList.add('current');
-        marker.textContent = '';
-        name.classList.add('big');
-      } else {
-        // determine if after current
-        const posCurrent = full.findIndex(x=>x.id===this.currentStopId);
-        if(posCurrent !== -1 && idx === posCurrent + 1){
-          marker.classList.add('next');
-          marker.textContent = '';
-          name.classList.add('big');
-        } else if(posCurrent !== -1 && idx > posCurrent + 1){
-          marker.classList.add('inactive');
-          marker.textContent = '';
-        } else {
-          // before current
-          marker.classList.add('inactive');
-          marker.textContent = '';
-        }
-      }
-
-      stopEl.appendChild(marker);
-      stopEl.appendChild(name);
-      stopsRow.appendChild(stopEl);
+      if(s.isCurrent){ marker.classList.add('current'); name.classList.add('big'); }
+      else if(s.isNext){ marker.classList.add('next'); name.classList.add('big'); }
+      else { marker.classList.add('inactive'); }
+      stopEl.appendChild(marker); stopEl.appendChild(name); stopsRow.appendChild(stopEl);
     });
-
-    const container = document.createElement('div');
-    container.appendChild(track);
-    container.appendChild(stopsRow);
-
-    wrapper.appendChild(container);
+    wrapper.appendChild(stopsRow);
     return wrapper;
   }
 
-  getDirectionLabel(lineData){
-    // try to find at least one trip headsign for that direction
+  // create branch (unique tail) element for a route
+  createBranchSection(route, lineData, tailStops){
+    const wrapper = document.createElement('div'); wrapper.style.marginBottom='12px';
+    const header = document.createElement('div');
+    header.style.display='flex'; header.style.justifyContent='space-between'; header.style.alignItems='center'; header.style.marginBottom='8px';
+    header.innerHTML = `
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div style="width:44px;height:44px;border-radius:8px;background:${route.color};display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff">${route.shortName}</div>
+        <div>
+          <div style="font-weight:700">${route.longName}</div>
+          <div style="font-size:12px;color:var(--muted)">${route.id} · ${tailStops.length} stations restantes</div>
+        </div>
+      </div>
+      <div style="color:var(--muted);font-size:12px">Direction: ${ this.getDirectionLabel(route.id, lineData.directionId) }</div>
+    `;
+    wrapper.appendChild(header);
+
+    const track = document.createElement('div'); track.className='track';
+    const seg = document.createElement('div'); seg.className='segment';
+    seg.style.width='100%'; seg.style.background = route.color; seg.style.opacity = 0.95;
+    track.appendChild(seg);
+    wrapper.appendChild(track);
+
+    const stopsRow = document.createElement('div'); stopsRow.className='stops';
+    tailStops.forEach((s,idx)=>{
+      const stopEl = document.createElement('div'); stopEl.className='stop';
+      const marker = document.createElement('div'); marker.className='stop-marker';
+      const name = document.createElement('div'); name.className='stop-name';
+      name.textContent = s.name;
+      if(s.isCurrent){ marker.classList.add('current'); name.classList.add('big'); }
+      else if(s.isNext){ marker.classList.add('next'); name.classList.add('big'); }
+      else { marker.classList.add('inactive'); }
+      stopEl.appendChild(marker); stopEl.appendChild(name); stopsRow.appendChild(stopEl);
+    });
+
+    wrapper.appendChild(stopsRow);
+    return wrapper;
+  }
+
+  getDirectionLabel(routeId, directionId){
     for(const [tid, trip] of this.data.trips){
-      if(trip.routeId === lineData.route.id){
-        if(lineData.directionId === null || lineData.directionId === '' || trip.directionId.toString() === lineData.directionId.toString()){
+      if(trip.routeId === routeId){
+        if(directionId === null || directionId === '' || trip.directionId.toString() === directionId.toString()){
           if(trip.headsign) return trip.headsign;
         }
       }
@@ -847,41 +597,20 @@ class RERDisplay {
   }
 
   mapNextItemsForPanel(lineData){
-    // produce simple items for right panel (route short, color, next stop, direction)
     const items = [];
-    const firstAfter = lineData.stopsAfter && lineData.stopsAfter[0];
-    if(firstAfter){
-      const routeShort = lineData.route.shortName;
-      items.push({
-        routeShort,
-        color: lineData.route.color,
-        stopName: firstAfter.name,
-        directionName: this.getDirectionLabel(lineData),
-        note: 'Prochain arrêt'
-      });
+    const first = lineData.stopsFromCurrent && lineData.stopsFromCurrent[1]; // next after current
+    if(first){
+      items.push({ routeShort: lineData.route.shortName, color: lineData.route.color, stopName: first.name, directionName: this.getDirectionLabel(lineData.route.id, lineData.directionId), note: 'Prochain arrêt' });
     }
-    // also add terminus
-    const last = lineData.fullStops[lineData.fullStops.length -1];
+    const last = lineData.stopsFromCurrent[lineData.stopsFromCurrent.length-1];
     if(last && last.id !== this.currentStopId){
-      items.push({
-        routeShort: lineData.route.shortName,
-        color: lineData.route.color,
-        stopName: last.name,
-        directionName: 'Terminùs',
-        note: 'Terminus'
-      });
+      items.push({ routeShort: lineData.route.shortName, color: lineData.route.color, stopName: last.name, directionName: 'Terminus', note: 'Terminus' });
     }
     return items;
   }
 
-  findSharedStops(stops1, stops2){
-    if(!stops1 || !stops2) return [];
-    const s2 = new Set(stops2.map(s=>s.id));
-    return stops1.filter(s=> s2.has(s.id));
-  }
-
   showError(message){
-    document.getElementById('scheme-container').innerHTML = `<div class="no-data">${message}</div>`;
+    document.getElementById('line-wrap').innerHTML = `<div class="no-data">${message}</div>`;
   }
 }
 
