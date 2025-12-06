@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTFS PAD Display</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="search-container">
+                <input type="text" id="stopSearch" placeholder="Enter stop ID or name...">
+                <button id="searchBtn"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="url-info">
+                <p>Or use URL: <code>https://yourdomain.com/?id=<span class="stop-id-example">YOUR_STOP_ID</span></code></p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="pad-display" id="padDisplay">
+                <div class="pad-header">
+                    <div class="line-info">
+                        <span class="line-name" id="lineName">--</span>
+                        <span class="line-direction" id="lineDirection">--</span>
+                    </div>
+                    <div class="time-info">
+                        <span id="currentTime">--:--</span>
+                        <span id="nextTrainTime">Next: --:--</span>
+                    </div>
+                </div>
+                
+                <div class="stations-container">
+                    <div class="stations-track" id="stationsTrack">
+                        <!-- Stations will be dynamically added here -->
+                        <div class="loading-stations">Loading stations...</div>
+                    </div>
+                </div>
+                
+                <div class="pad-footer">
+                    <div class="destination-info">
+                        <span class="dest-label">To:</span>
+                        <span class="dest-name" id="destinationName">--</span>
+                    </div>
+                    <div class="update-info">
+                        <span id="updateStatus">Last update: --:--</span>
+                        <button id="refreshBtn" class="refresh-btn"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-panel" id="infoPanel">
+                <h3><i class="fas fa-info-circle"></i> Information</h3>
+                <div class="info-content">
+                    <p><strong>Current Stop:</strong> <span id="currentStopInfo">--</span></p>
+                    <p><strong>Available Directions:</strong> <span id="directionsCount">0</span></p>
+                    <p><strong>Next Train In:</strong> <span id="nextTrainMinutes">--</span> minutes</p>
+                    <p><strong>Following Trains:</strong></p>
+                    <ul id="followingTrains">
+                        <li>No upcoming trains</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>GTFS PAD Display System | Real-time transit information</p>
+            <p class="clock" id="liveClock">--:--:--</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
