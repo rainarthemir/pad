@@ -1,175 +1,296 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>RER Unified Line Viewer</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>RER Unified Line — Full</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: #f4f4f4;
+:root{
+  --bg:#0b0b0c;
+  --panel:#0f1113;
+  --muted:#9aa3ad;
+  --card:#111416;
+  --glass: rgba(255,255,255,0.03);
+  --text:#e6eef3;
+  --small:12px;
+  --radius:10px;
 }
-#controls {
-  padding: 12px;
-  background: white;
-  border-bottom: 1px solid #ccc;
-  display: flex;
-  gap: 10px;
-}
-#line-container {
-  padding: 20px;
-}
-.station-row {
-  display: flex;
-  align-items: center;
-}
-.station-name {
-  margin-left: 10px;
-}
-.main-line {
-  width: 4px;
-  background: #c0002a;
-  margin: 0 20px;
-}
-.branch-container {
-  display: flex;
-  margin-left: 40px;
-  gap: 30px;
-}
-.branch-line {
-  width: 3px;
-  background: #888;
-}
-.node {
-  width: 14px;
-  height: 14px;
-  background: white;
-  border: 4px solid #c0002a;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.branch-node {
-  border-color: #888;
-}
-.highlight {
-  border-color: #00a1ff !important;
-}
+html,body{height:100%;margin:0;background: linear-gradient(180deg,#050607 0%, #0b0b0c 100%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial}
+.app{max-width:1200px;margin:18px auto;padding:18px;box-sizing:border-box}
+.header{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:12px}
+.station-info #station-name{font-size:22px;font-weight:700}
+.meta{color:var(--muted);font-size:13px}
+.controls{display:flex;gap:8px;align-items:center}
+select,button{background:var(--panel);color:var(--text);border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;font-size:14px}
+.container{display:grid;grid-template-columns:1fr 420px;gap:18px}
+.panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:18px;box-shadow:0 8px 30px rgba(0,0,0,0.6);min-height:260px}
+.line-wrap{display:flex;flex-direction:column;gap:12px}
+.track-row{position:relative;padding:8px 0}
+.track{height:8px;border-radius:999px;background:rgba(255,255,255,0.03);position:relative}
+.track .seg{position:absolute;left:0;top:0;height:100%;border-radius:999px}
+.stops-row{display:flex;gap:22px;align-items:center;padding-top:14px;overflow:auto}
+.stop{display:flex;flex-direction:column;align-items:center;min-width:110px;text-align:center}
+.stop-marker{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.stop-name{font-size:12px;color:var(--muted);max-height:36px;overflow:hidden}
+.stop-name.big{color:var(--text)}
+.stop-marker.current{width:28px;height:28px;background:white;border:3px solid rgba(0,0,0,0.12)}
+.stop-marker.next{box-shadow:0 6px 18px rgba(0,0,0,0.12);}
+.branch-wrap{display:flex;gap:12px}
+.branch{flex:1}
+.branch .track{height:6px}
+.panel-right{display:flex;flex-direction:column;gap:12px}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.01));padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+.big-time{font-size:28px;font-weight:700}
+.next-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.next-item{display:flex;align-items:center;gap:12px;padding:6px 8px;border-radius:8px}
+.pill{min-width:44px;padding:6px 10px;border-radius:999px;color:white;font-weight:700;text-align:center}
+@media (max-width:1000px){.container{grid-template-columns:1fr}.stops-row{padding-bottom:8px}}
 </style>
 </head>
 <body>
-<div id="controls">
-  <label>Main trip: <select id="tripMain"></select></label>
-  <label>Variant trip: <select id="tripVar"></select></label>
-  <label>Current stop: <select id="currentStop"></select></label>
-  <button onclick="renderUnified()">Render</button>
+<div class="app">
+  <div>
+    <div class="header">
+      <div class="station-info">
+        <div id="station-name">—</div>
+        <div class="meta">ID: <span id="stop-id">—</span> · Mise à jour: <span id="update-time">—</span></div>
+      </div>
+
+      <div class="controls">
+        <label class="meta">Route: <select id="routeSelect"></select></label>
+        <label class="meta">Trip (main): <select id="tripMain"></select></label>
+        <label class="meta">Trip (variant): <select id="tripVar"></select></label>
+        <label class="meta">Current stop: <select id="currentStop"></select></label>
+        <button id="btnRender">Render</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="panel">
+        <div class="line-wrap" id="line-wrap">
+          <!-- rendered sections here -->
+        </div>
+      </div>
+
+      <div class="panel panel-right">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="big-time" id="current-time">--:--</div>
+              <div class="meta">Heure locale</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="meta">Station</div>
+              <div id="station-name-dup" style="font-weight:600;"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <div class="meta">Prochains trains</div>
+            <div class="next-list" id="next-list"></div>
+          </div>
+        </div>
+
+        <div class="card" id="shared-card" style="display:none;">
+          <div style="font-weight:700">SECTION COMMUNE</div>
+          <div class="meta" id="shared-stops"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<div id="line-container"></div>
+
 <script>
-let gtfsTrips = {}; // trip_id -> array of {stop_id, stop_name}
-let routeColor = "#c0002a";
-
-function setGTFS(data, color) {
-  gtfsTrips = data;
-  routeColor = color;
-  const mainSel = document.getElementById("tripMain");
-  const varSel = document.getElementById("tripVar");
-  mainSel.innerHTML = "";
-  varSel.innerHTML = "";
-  Object.keys(gtfsTrips).forEach(t => {
-    mainSel.innerHTML += `<option value="${t}">${t}</option>`;
-    varSel.innerHTML += `<option value="${t}">${t}</option>`;
-  });
-  updateCurrentStops();
-}
-
-function updateCurrentStops() {
-  const t = document.getElementById("tripMain").value;
-  const s = document.getElementById("currentStop");
-  s.innerHTML = "";
-  if (!gtfsTrips[t]) return;
-  gtfsTrips[t].forEach(st => {
-    s.innerHTML += `<option value="${st.stop_id}">${st.stop_name}</option>`;
-  });
-}
-
-document.getElementById("tripMain").addEventListener("change", updateCurrentStops);
-
-document.getElementById("tripVar").addEventListener("change", () => {});
-
-function renderUnified() {
-  const mainId = document.getElementById("tripMain").value;
-  const varId = document.getElementById("tripVar").value;
-  const currentStop = document.getElementById("currentStop").value;
-  if (!mainId || !varId) return;
-
-  const main = gtfsTrips[mainId];
-  const vari = gtfsTrips[varId];
-
-  const mainIds = main.map(s => s.stop_id);
-  const varIds = vari.map(s => s.stop_id);
-
-  const common = mainIds.filter(id => varIds.includes(id));
-  const divergeIndex = mainIds.findIndex(id => !varIds.includes(id));
-  const convergeId = common[common.length - 1];
-
-  const startIndex = mainIds.indexOf(currentStop);
-  let container = document.getElementById("line-container");
-  container.innerHTML = "";
-
-  let i = startIndex;
-  while (i < main.length) {
-    const stop = main[i];
-    if (stop.stop_id === divergeIndex) break;
-    container.appendChild(buildMainNode(stop));
-    i++;
+// Full implementation: loads GTFS (stops,routes,trips,stop_times), populates selects (routes -> trips), and renders a unified line from current stop forward
+class UnifiedRER {
+  constructor(){
+    this.data = { stops: new Map(), routes: new Map(), trips: new Map(), stopTimes: new Map() };
+    this.currentStopId = this.getStopIdFromURL();
+    this.init();
   }
 
-  const branchBox = document.createElement("div");
-  branchBox.className = "branch-container";
-  branchBox.appendChild(buildBranch(main, mainIds, divergeIndex));
-  branchBox.appendChild(buildBranch(vari, varIds, divergeIndex));
-  container.appendChild(branchBox);
+  getStopIdFromURL(){ const p = new URLSearchParams(window.location.search); return p.get('id') || '8775860'; }
 
-  container.appendChild(buildMainNode(getStop(main, convergeId)));
+  async init(){
+    this.updateCurrentTime();
+    try{
+      await this.loadGTFS();
+      this.setupUI();
+      this.updateStationInfo();
+      this.renderFromUI();
+      setInterval(()=>this.updateCurrentTime(),1000);
+      setInterval(()=>this.updateTimestamp(),1000);
+    }catch(e){ console.error(e); this.showError('Impossible de charger GTFS'); }
+  }
+
+  async loadGTFS(){
+    const files = ['stops','routes','trips','stop_times'];
+    let any=false;
+    for(const f of files){
+      try{
+        const r = await fetch(`gtfs/${f}.txt`);
+        if(r.ok){ const text = await r.text(); this.parseFile(f,text); any=true; }
+      }catch(e){ console.warn('no',f,e.message); }
+    }
+    if(!any) this.loadDemo();
+    // post-process: ensure stopTimes sorted by sequence
+    for(const [tid, arr] of this.data.stopTimes) arr.sort((a,b)=> (a.sequence||0)-(b.sequence||0));
+  }
+
+  parseFile(name,text){ if(!text) return; const rows = text.trim().split(/\r?\n/); if(rows.length<2) return; const headers = rows[0].split(',').map(h=>h.trim()); for(let i=1;i<rows.length;i++){ const line = rows[i]; if(!line) continue; const vals = line.split(',').map(v=>v.trim()); const row = {}; headers.forEach((h,idx)=> row[h]= vals[idx] ?? ''); this.processRow(name,row); } }
+
+  processRow(name,row){ switch(name){
+    case 'stops': if(row.stop_id && row.stop_name) this.data.stops.set(row.stop_id,{id:row.stop_id,name:row.stop_name}); break;
+    case 'routes': if(row.route_id) this.data.routes.set(row.route_id,{id:row.route_id,shortName:row.route_short_name||row.route_id,longName:row.route_long_name||row.route_id,color: row.route_color ? ('#'+row.route_color.replace('#','')) : null}); break;
+    case 'trips': if(row.trip_id && row.route_id) this.data.trips.set(row.trip_id,{id:row.trip_id,routeId:row.route_id,headsign: row.trip_headsign || '',directionId: row.direction_id!==undefined && row.direction_id!=='' ? parseInt(row.direction_id) : 0}); break;
+    case 'stop_times': if(row.trip_id && row.stop_id){ const t = row.trip_id; if(!this.data.stopTimes.has(t)) this.data.stopTimes.set(t,[]); this.data.stopTimes.get(t).push({tripId:t,stopId:row.stop_id,sequence: row.stop_sequence ? parseInt(row.stop_sequence):0,arrival:row.arrival_time||'',departure:row.departure_time||''}); } break;
+  } }
+
+  loadDemo(){
+    const stops = [ {id:'8775860',name:'GARE DE LYON RER'},{id:'8775861',name:'CHATELET - LES HALLES'},{id:'8775862',name:'AUBER'},{id:'8775863',name:'CHARLES DE GAULLE - ÉTOILE'},{id:'8775864',name:'LA DÉFENSE'},{id:'8775865',name:'NANTERRE PRÉFECTURE'},{id:'8775866',name:'NANTERRE UNIVERSITÉ'},{id:'8775867',name:'NANTERRE VILLE'},{id:'8775868',name:'SARTROUVILLE'},{id:'8775869',name:'MAISONS-LAFFITTE'},{id:'8775870',name:'LE VÉSINET - LE PECQ'} ];
+    stops.forEach(s=>this.data.stops.set(s.id,s));
+    this.data.routes.set('RERA',{id:'RERA',shortName:'A',longName:'RER A',color:'#FF0000'});
+    this.data.trips.set('A-main',{id:'A-main',routeId:'RERA',headsign:'SAINT-GERMAIN',directionId:0});
+    this.data.trips.set('A-alt',{id:'A-alt',routeId:'RERA',headsign:'MARNE-LA-VALLEE',directionId:1});
+    this.data.stopTimes.set('A-main',[{tripId:'A-main',stopId:'8775860',sequence:1},{tripId:'A-main',stopId:'8775861',sequence:2},{tripId:'A-main',stopId:'8775862',sequence:3},{tripId:'A-main',stopId:'8775863',sequence:4},{tripId:'A-main',stopId:'8775864',sequence:5},{tripId:'A-main',stopId:'8775865',sequence:6},{tripId:'A-main',stopId:'8775866',sequence:7}]);
+    this.data.stopTimes.set('A-alt',[{tripId:'A-alt',stopId:'8775860',sequence:1},{tripId:'A-alt',stopId:'8775861',sequence:2},{tripId:'A-alt',stopId:'8775862',sequence:3},{tripId:'A-alt',stopId:'8775869',sequence:4},{tripId:'A-alt',stopId:'8775870',sequence:5},{tripId:'A-alt',stopId:'8775866',sequence:6}]);
+  }
+
+  setupUI(){
+    // populate routes select
+    const routeSel = document.getElementById('routeSelect'); routeSel.innerHTML='';
+    Array.from(this.data.routes.values()).sort((a,b)=> (a.shortName||a.id).localeCompare(b.shortName||b.id)).forEach(r=>{ const opt=document.createElement('option'); opt.value=r.id; opt.textContent=`${r.shortName} — ${r.longName}`; routeSel.appendChild(opt); });
+    // events
+    routeSel.addEventListener('change', ()=> this.onRouteChange());
+    document.getElementById('tripMain').addEventListener('change', ()=> this.onTripChange());
+    document.getElementById('tripVar').addEventListener('change', ()=> this.onTripChange());
+    document.getElementById('btnRender').addEventListener('click', ()=> this.renderFromUI());
+    // select first route by default
+    if(routeSel.options.length) routeSel.selectedIndex = 0; this.onRouteChange();
+  }
+
+  onRouteChange(){
+    const rId = document.getElementById('routeSelect').value;
+    // populate trips for route
+    const tripsMain = document.getElementById('tripMain'); const tripsVar = document.getElementById('tripVar'); tripsMain.innerHTML=''; tripsVar.innerHTML='';
+    for(const [tid, t] of this.data.trips){ if(t.routeId === rId){ const o1=document.createElement('option'); o1.value=tid; o1.textContent=tid+' '+(t.headsign?'- '+t.headsign:''); tripsMain.appendChild(o1); const o2=o1.cloneNode(true); tripsVar.appendChild(o2); }}
+    // pick first two if available
+    if(tripsMain.options.length>0) tripsMain.selectedIndex = 0;
+    if(tripsVar.options.length>1) tripsVar.selectedIndex = 1; else if(tripsVar.options.length>0) tripsVar.selectedIndex = 0;
+    this.onTripChange();
+  }
+
+  onTripChange(){
+    // build currentStop select from main trip
+    const mainId = document.getElementById('tripMain').value; const curSel = document.getElementById('currentStop'); curSel.innerHTML='';
+    const arr = this.data.stopTimes.get(mainId) || [];
+    arr.forEach(st=>{ const opt=document.createElement('option'); opt.value=st.stopId; opt.textContent=(this.data.stops.get(st.stopId)?.name || st.stopId); curSel.appendChild(opt); });
+    // if currentStop from URL is present, select it
+    if(this.currentStopId){ const opt = Array.from(curSel.options).find(o=> o.value === this.currentStopId); if(opt) curSel.value = this.currentStopId; }
+  }
+
+  updateStationInfo(){ const s = this.data.stops.get(this.currentStopId); const name = s? s.name : `ARRÊT ${this.currentStopId}`; document.getElementById('station-name').textContent = name; document.getElementById('station-name-dup').textContent = name; document.getElementById('stop-id').textContent = this.currentStopId; }
+  updateCurrentTime(){ const now=new Date(); document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); }
+  updateTimestamp(){ const now=new Date(); document.getElementById('update-time').textContent = now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+
+  // helpers to map trip -> ordered stop list with stop objects
+  getStopsForTrip(tripId){ const seq = (this.data.stopTimes.get(tripId) || []).slice().sort((a,b)=>a.sequence-b.sequence); return seq.map(s=> ({ id: s.stopId, name: this.data.stops.get(s.stopId)?.name || s.stopId })); }
+
+  // stops from current (inclusive) onward
+  getFromCurrent(tripId, currentStopId){ const all = this.getStopsForTrip(tripId); const idx = all.findIndex(s=> s.id === currentStopId); if(idx === -1) return []; return all.slice(idx); }
+
+  // longest common prefix for arrays of stop ids
+  commonPrefix(a,b){ const out=[]; const n=Math.min(a.length,b.length); for(let i=0;i<n;i++){ if(a[i].id===b[i].id) out.push(a[i]); else break; } return out; }
+
+  // render logic: unified line with shared prefix and two branches after split, but everything shown from current stop
+  renderFromUI(){
+    const mainId = document.getElementById('tripMain').value; const varId = document.getElementById('tripVar').value; const current = document.getElementById('currentStop').value;
+    this.currentStopId = current || this.currentStopId;
+    this.updateStationInfo();
+
+    const lineWrap = document.getElementById('line-wrap'); lineWrap.innerHTML='';
+    if(!mainId){ lineWrap.innerHTML='<div class="meta">Choisissez un trip principal</div>'; return; }
+    const mainStopsAll = this.getStopsForTrip(mainId);
+    const varStopsAll = varId ? this.getStopsForTrip(varId) : [];
+    const mainFrom = this.getFromCurrent(mainId,this.currentStopId);
+    const varFrom = varId ? this.getFromCurrent(varId,this.currentStopId) : [];
+    if(mainFrom.length===0 && varFrom.length===0){ lineWrap.innerHTML='<div class="meta">Aucune station trouvée depuis l\'arrêt courant</div>'; return; }
+
+    // If there's only one trip or variant absent: render single track from current
+    const route = this.data.routes.get(this.data.trips.get(mainId).routeId) || {color:'#888',shortName:'?'};
+
+    if(!varId || varId===mainId){ // single
+      lineWrap.appendChild(this.buildSectionSingle(route, mainFrom));
+    } else {
+      // compute common prefix between two arrays (from current)
+      const common = this.commonPrefix(mainFrom, varFrom);
+      const commonLen = common.length;
+      if(commonLen>0){
+        // render shared section
+        lineWrap.appendChild(this.buildSectionShared(common, route.color, this.data.routes.get(this.data.trips.get(varId).routeId)?.color || route.color, this.data.routes.get(mainId) || route, this.data.routes.get(varId) || route));
+        // tails after shared
+        const tailMain = mainFrom.slice(commonLen);
+        const tailVar = varFrom.slice(commonLen);
+        // if both tails are empty (identical), nothing more
+        if(tailMain.length===0 && tailVar.length===0) return;
+        // render a combined row with two branches visually connected to the shared
+        lineWrap.appendChild(this.buildBranches(route, this.data.routes.get(this.data.trips.get(varId).routeId) || route, common[common.length-1], tailMain, tailVar));
+      } else {
+        // no shared prefix starting from current: render two parallel tracks
+        lineWrap.appendChild(this.buildSectionSingle(this.data.routes.get(this.data.trips.get(mainId).routeId) || route, mainFrom));
+        lineWrap.appendChild(this.buildSectionSingle(this.data.routes.get(this.data.trips.get(varId).routeId) || route, varFrom));
+      }
+    }
+
+    // fill right panel next-list
+    this.fillNextPanel(mainFrom,varFrom,mainId,varId);
+
+    // shared station text
+    if(varId){ const shared = this.commonPrefix(mainFrom,varFrom); if(shared.length){ document.getElementById('shared-card').style.display='block'; document.getElementById('shared-stops').textContent = shared.map(s=>s.name).join(' • '); } else document.getElementById('shared-card').style.display='none'; }
+  }
+
+  buildSectionSingle(route, stops){
+    const wrapper = document.createElement('div');
+    // header
+    const header=document.createElement('div'); header.style.display='flex'; header.style.justifyContent='space-between'; header.style.marginBottom='6px'; header.innerHTML = `<div style="display:flex;gap:12px;align-items:center"><div style="width:44px;height:44px;border-radius:8px;background:${route.color||'#666'};display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff">${route.shortName||''}</div><div><div style='font-weight:700'>${route.longName||route.id||''}</div><div class='meta'>${stops.length} arrêts</div></div></div>`;
+    wrapper.appendChild(header);
+    // track
+    const trackRow = document.createElement('div'); trackRow.className='track-row'; const track = document.createElement('div'); track.className='track'; const seg=document.createElement('div'); seg.className='seg'; seg.style.width='100%'; seg.style.background = route.color || '#666'; track.appendChild(seg); trackRow.appendChild(track); wrapper.appendChild(trackRow);
+    // stops
+    const stopsRow = document.createElement('div'); stopsRow.className='stops-row'; stops.forEach((s,idx)=>{ const el=document.createElement('div'); el.className='stop'; const mark=document.createElement('div'); mark.className='stop-marker'; if(idx===0) mark.classList.add('current'); else if(idx===1) mark.classList.add('next'); mark.style.borderColor = route.color || '#666'; mark.style.background = idx<=1 ? route.color || '#666' : 'rgba(255,255,255,0.06)'; const name=document.createElement('div'); name.className='stop-name'; if(idx<=1) name.classList.add('big'); name.textContent = s.name; el.appendChild(mark); el.appendChild(name); stopsRow.appendChild(el); }); wrapper.appendChild(stopsRow); return wrapper;
+  }
+
+  buildSectionShared(sharedStops, colorA, colorB, routeA, routeB){
+    const wrapper=document.createElement('div'); const header=document.createElement('div'); header.style.display='flex'; header.style.justifyContent='space-between'; header.style.marginBottom='6px'; header.innerHTML = `<div style='display:flex;gap:12px;align-items:center'><div style="width:56px;height:44px;border-radius:8px;background:linear-gradient(90deg, ${colorA||'#666'} 0%, ${colorB||'#444'} 100%);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff">${(routeA.shortName||'')}/${(routeB.shortName||'')}</div><div><div style='font-weight:700'>SECTION COMMUNE</div><div class='meta'>${sharedStops.length} arrêts</div></div></div>`; wrapper.appendChild(header);
+    const trackRow=document.createElement('div'); trackRow.className='track-row'; const track=document.createElement('div'); track.className='track'; const seg=document.createElement('div'); seg.className='seg'; seg.style.width='100%'; seg.style.background = `linear-gradient(90deg, ${colorA||'#666'} 0%, ${colorB||'#444'} 100%)`; track.appendChild(seg); trackRow.appendChild(track); wrapper.appendChild(trackRow);
+    const stopsRow=document.createElement('div'); stopsRow.className='stops-row'; sharedStops.forEach((s,idx)=>{ const el=document.createElement('div'); el.className='stop'; const mark=document.createElement('div'); mark.className='stop-marker'; if(idx===0) mark.classList.add('current'); else if(idx===1) mark.classList.add('next'); mark.style.borderColor = '#fff'; mark.style.background = idx<=1 ? 'white' : 'rgba(255,255,255,0.06)'; const name=document.createElement('div'); name.className='stop-name'; if(idx<=1) name.classList.add('big'); name.textContent = s.name; el.appendChild(mark); el.appendChild(name); stopsRow.appendChild(el); }); wrapper.appendChild(stopsRow); return wrapper;
+  }
+
+  // render branches visually 'connected' to shared last stop
+  buildBranches(routeMain, routeVar, sharedLastStop, tailMain, tailVar){
+    const wrapper=document.createElement('div'); wrapper.style.display='flex'; wrapper.style.flexDirection='column'; wrapper.style.gap='8px';
+    const header=document.createElement('div'); header.style.display='flex'; header.style.justifyContent='space-between'; header.style.marginBottom='6px'; header.innerHTML = `<div style='display:flex;gap:12px;align-items:center'><div style="width:44px;height:44px;border-radius:8px;background:${routeMain.color||'#666'};display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff">${routeMain.shortName||''}</div><div><div style='font-weight:700'>Branche ${routeMain.shortName||''}</div><div class='meta'>${tailMain.length} arrêts</div></div></div><div style='display:flex;gap:8px;align-items:center'><div class='meta'>Branche ${routeVar.shortName||''}</div></div>`; wrapper.appendChild(header);
+    const container=document.createElement('div'); container.className='branch-wrap';
+    // branch A
+    const branchA=document.createElement('div'); branchA.className='branch'; const trackA=document.createElement('div'); trackA.className='track'; const segA=document.createElement('div'); segA.className='seg'; segA.style.width='100%'; segA.style.background = routeMain.color || '#666'; segA.style.opacity = 0.95; trackA.appendChild(segA); branchA.appendChild(trackA);
+    const stopsRowA=document.createElement('div'); stopsRowA.className='stops-row'; tailMain.forEach((s,idx)=>{ const el=document.createElement('div'); el.className='stop'; const mark=document.createElement('div'); mark.className='stop-marker'; if(idx===0) mark.classList.add('next'); mark.style.borderColor = routeMain.color || '#666'; mark.style.background = idx<=0 ? routeMain.color || '#666' : 'rgba(255,255,255,0.06)'; const name=document.createElement('div'); name.className='stop-name'; if(idx===0) name.classList.add('big'); name.textContent=s.name; el.appendChild(mark); el.appendChild(name); stopsRowA.appendChild(el); }); branchA.appendChild(stopsRowA);
+    // branch B
+    const branchB=document.createElement('div'); branchB.className='branch'; const trackB=document.createElement('div'); trackB.className='track'; const segB=document.createElement('div'); segB.className='seg'; segB.style.width='100%'; segB.style.background = routeVar.color || '#444'; segB.style.opacity = 0.95; trackB.appendChild(segB); branchB.appendChild(trackB);
+    const stopsRowB=document.createElement('div'); stopsRowB.className='stops-row'; tailVar.forEach((s,idx)=>{ const el=document.createElement('div'); el.className='stop'; const mark=document.createElement('div'); mark.className='stop-marker'; if(idx===0) mark.classList.add('next'); mark.style.borderColor = routeVar.color || '#444'; mark.style.background = idx<=0 ? routeVar.color || '#444' : 'rgba(255,255,255,0.06)'; const name=document.createElement('div'); name.className='stop-name'; if(idx===0) name.classList.add('big'); name.textContent=s.name; el.appendChild(mark); el.appendChild(name); stopsRowB.appendChild(el); }); branchB.appendChild(stopsRowB);
+    container.appendChild(branchA); container.appendChild(branchB); wrapper.appendChild(container); return wrapper;
+  }
+
+  fillNextPanel(mainFrom, varFrom, mainId, varId){ const list=document.getElementById('next-list'); list.innerHTML=''; const items=[]; if(mainFrom && mainFrom.length>1){ items.push({route:this.data.routes.get(this.data.trips.get(mainId).routeId), stop:mainFrom[1], note:'Prochain arrêt'}); }
+    if(varFrom && varFrom.length>1){ items.push({route:this.data.routes.get(this.data.trips.get(varId).routeId), stop:varFrom[1], note:'Prochain (var)' }); }
+    // add termini
+    if(mainFrom && mainFrom.length) items.push({route:this.data.routes.get(this.data.trips.get(mainId).routeId), stop: mainFrom[mainFrom.length-1], note:'Terminus'});
+    items.slice(0,6).forEach(it=>{ const node=document.createElement('div'); node.className='next-item'; const pill=document.createElement('div'); pill.className='pill'; pill.textContent=it.route?.shortName||''; pill.style.background = it.route?.color || '#666'; const meta=document.createElement('div'); meta.style.flex='1'; meta.innerHTML = `<div style='font-weight:600'>${it.stop?.name||''}</div><div class='meta'>${it.note}</div>`; node.appendChild(pill); node.appendChild(meta); list.appendChild(node); }); }
+
+  showError(msg){ document.getElementById('line-wrap').innerHTML = `<div class='meta'>${msg}</div>`; }
 }
 
-function getStop(arr, id) {
-  return arr.find(s => s.stop_id === id);
-}
-
-function buildMainNode(stop) {
-  let row = document.createElement("div");
-  row.className = "station-row";
-  let n = document.createElement("div");
-  n.className = "node";
-  n.style.borderColor = routeColor;
-  let name = document.createElement("div");
-  name.className = "station-name";
-  name.textContent = stop.stop_name;
-  row.appendChild(n);
-  row.appendChild(name);
-  return row;
-}
-
-function buildBranch(list, ids, divergeIndex) {
-  const box = document.createElement("div");
-  ids.forEach(id => {
-    let row = document.createElement("div");
-    row.className = "station-row";
-    let n = document.createElement("div");
-    n.className = "node branch-node";
-    let name = document.createElement("div");
-    name.className = "station-name";
-    let st = getStop(list, id);
-    if (!st) return;
-    name.textContent = st.stop_name;
-    row.appendChild(n);
-    row.appendChild(name);
-    box.appendChild(row);
-  });
-  return box;
-}
+// start
+window.addEventListener('DOMContentLoaded', ()=>{ window.unified = new UnifiedRER(); document.getElementById('btnRender').addEventListener('click', ()=> unified.renderFromUI()); });
 </script>
 </body>
 </html>
