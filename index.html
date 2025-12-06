@@ -1,88 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTFS PAD Display</title>
+    <title>Tablo RER - Gare de Lyon</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <div class="search-container">
-                <input type="text" id="stopSearch" placeholder="Enter stop ID or name...">
-                <button id="searchBtn"><i class="fas fa-search"></i></button>
-                <button id="demoBtn" class="demo-btn"><i class="fas fa-play"></i> Demo</button>
-            </div>
-            <div class="url-info">
-                <p>Use URL: <code>https://yourusername.github.io/repo/?id=<span class="stop-id-example">STOP_ID</span></code></p>
+            <h1 class="station-name">Gare de Lyon</h1>
+            <div class="line-selector">
+                <div class="line-selection">
+                    <label for="line1">Ligne 1:</label>
+                    <select id="line1">
+                        <option value="RERA">RER A</option>
+                        <option value="RERB">RER B</option>
+                        <option value="RERC">RER C</option>
+                        <option value="RERD">RER D</option>
+                        <option value="RERE">RER E</option>
+                    </select>
+                    
+                    <label for="direction1">Direction 1:</label>
+                    <select id="direction1">
+                        <option value="west">Ouest</option>
+                        <option value="east">Est</option>
+                        <option value="north">Nord</option>
+                        <option value="south">Sud</option>
+                    </select>
+                </div>
+                
+                <div class="line-selection">
+                    <label for="line2">Ligne 2:</label>
+                    <select id="line2">
+                        <option value="RERA">RER A</option>
+                        <option value="RERB">RER B</option>
+                        <option value="RERC">RER C</option>
+                        <option value="RERD">RER D</option>
+                        <option value="RERE">RER E</option>
+                    </select>
+                    
+                    <label for="direction2">Direction 2:</label>
+                    <select id="direction2">
+                        <option value="west">Ouest</option>
+                        <option value="east">Est</option>
+                        <option value="north">Nord</option>
+                        <option value="south">Sud</option>
+                    </select>
+                </div>
             </div>
         </header>
 
-        <main class="main-content">
-            <div class="pad-display" id="padDisplay">
-                <div class="pad-header">
-                    <div class="line-info">
-                        <span class="line-name" id="lineName">--</span>
-                        <span class="line-direction" id="lineDirection">Select a stop</span>
-                    </div>
-                    <div class="time-info">
-                        <span id="currentTime">--:--</span>
-                        <span id="nextTrainTime">Next: --:--</span>
-                    </div>
-                </div>
-                
-                <div class="stations-container">
-                    <div class="stations-track" id="stationsTrack">
-                        <div class="welcome-message">
-                            <h3><i class="fas fa-train"></i> GTFS PAD Display</h3>
-                            <p>Enter a stop ID or name to view real-time departure information</p>
-                            <p>Or click <strong>Demo</strong> button to see example data</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="pad-footer">
-                    <div class="destination-info">
-                        <span class="dest-label">To:</span>
-                        <span class="dest-name" id="destinationName">--</span>
-                    </div>
-                    <div class="update-info">
-                        <span id="updateStatus">Ready</span>
-                        <button id="refreshBtn" class="refresh-btn"><i class="fas fa-sync-alt"></i></button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="info-panel" id="infoPanel">
-                <h3><i class="fas fa-info-circle"></i> Information</h3>
-                <div class="info-content">
-                    <p><strong>Current Stop:</strong> <span id="currentStopInfo">--</span></p>
-                    <p><strong>Available Directions:</strong> <span id="directionsCount">0</span></p>
-                    <p><strong>Next Train In:</strong> <span id="nextTrainMinutes">--</span> min</p>
-                    <p><strong>Following Trains:</strong></p>
-                    <ul id="followingTrains">
-                        <li>No data</li>
-                    </ul>
-                    <div class="gtfs-info">
-                        <p><strong>GTFS Files Loaded:</strong></p>
-                        <div id="gtfsStatus">Loading...</div>
-                    </div>
-                </div>
-            </div>
+        <main class="departure-board">
+            <!-- Tablo будет заполняться динамически -->
+            <div id="departure-list" class="departure-list"></div>
         </main>
         
         <footer class="footer">
-            <p>GTFS PAD Display | Works on GitHub Pages | <a href="#" id="viewSource">View Source</a></p>
-            <p class="clock" id="liveClock">--:--:--</p>
+            <div class="update-time">Dernière mise à jour: <span id="update-time">--:--</span></div>
+            <div class="station-id">Arrêt ID: <span id="stop-id">...</span></div>
         </footer>
     </div>
 
-    <!-- Demo Data Script -->
-    <script src="demo-data.js"></script>
-    
-    <!-- Main App Script -->
     <script src="script.js"></script>
 </body>
 </html>
