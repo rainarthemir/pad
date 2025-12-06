@@ -1,954 +1,780 @@
-// GTFS Data Manager - работает ТОЛЬКО с GTFS файлами
-class GTFSManager {
+class GTFSProcessor {
     constructor() {
-        this.stops = [];
-        this.stopTimes = [];
-        this.trips = [];
-        this.routes = [];
-        this.calendar = [];
-        this.dataLoaded = false;
-        this.loadStatus = {
-            stops: false,
-            stopTimes: false,
-            trips: false,
-            routes: false,
-            calendar: false
+        this.data = {
+            stops: new Map(),
+            stopTimes: new Map(),
+            trips: new Map(),
+            routes: new Map(),
+            calendar: new Map(),
+            calendarDates: new Map()
         };
-        this.loadAttempts = 0;
-        this.maxLoadAttempts = 3;
+        this.isLoaded = false;
     }
 
-    async loadGTFSData() {
-        console.log("Loading GTFS data from files...");
-        this.showStatus("Loading GTFS files...");
-        
+    async loadAllData() {
         try {
-            // Пытаемся загрузить все GTFS файлы
-            const files = [
-                { name: 'stops', required: true },
-                { name: 'stop_times', required: true },
-                { name: 'trips', required: true },
-                { name: 'routes', required: true },
-                { name: 'calendar', required: false }
-            ];
+            console.log('Loading GTFS data...');
             
-            const loadPromises = files.map(file => this.loadGTFSFile(file.name, file.required));
-            await Promise.allSettled(loadPromises);
+            // Загружаем все необходимые файлы параллельно
+            const [
+                stopsText,
+                stopTimesText,
+                tripsText,
+                routesText,
+                calendarText,
+                calendarDatesText
+            ] = await Promise.all([
+                this.loadFile('gtfs/stops.txt'),
+                this.loadFile('gtfs/stop_times.txt'),
+                this.loadFile('gtfs/trips.txt'),
+                this.loadFile('gtfs/routes.txt'),
+                this.loadFile('gtfs/calendar.txt'),
+                this.loadFile('gtfs/calendar_dates.txt')
+            ]);
+
+            // Парсим данные
+            this.parseStops(stopsText);
+            this.parseStopTimes(stopTimesText);
+            this.parseTrips(tripsText);
+            this.parseRoutes(routesText);
+            this.parseCalendar(calendarText);
+            this.parseCalendarDates(calendarDatesText);
             
-            // Проверяем загрузились ли обязательные файлы
-            const essentialFilesLoaded = this.loadStatus.stops && 
-                                        this.loadStatus.stopTimes && 
-                                        this.loadStatus.trips && 
-                                        this.loadStatus.routes;
+            this.isLoaded = true;
+            console.log('GTFS data loaded successfully');
+            console.log(`Loaded: ${this.data.stops.size} stops, ${this.data.trips.size} trips`);
             
-            if (!essentialFilesLoaded) {
-                this.loadAttempts++;
-                
-                if (this.loadAttempts < this.maxLoadAttempts) {
-                    console.log(`Retrying GTFS load (attempt ${this.loadAttempts + 1}/${this.maxLoadAttempts})...`);
-                    setTimeout(() => this.loadGTFSData(), 1000);
-                    return false;
-                }
-                
-                throw new Error("Failed to load essential GTFS files after multiple attempts");
-            }
-            
-            console.log("GTFS data loaded successfully:", {
-                stops: this.stops.length,
-                stopTimes: this.stopTimes.length,
-                trips: this.trips.length,
-                routes: this.routes.length,
-                calendar: this.calendar.length
-            });
-            
-            this.dataLoaded = true;
-            this.showStatus("GTFS data loaded");
             return true;
-            
         } catch (error) {
-            console.error("Critical error loading GTFS data:", error);
-            this.showStatus(`Error: ${error.message}`);
+            console.error('Error loading GTFS data:', error);
             return false;
         }
     }
 
-    async loadGTFSFile(fileName, required = true) {
+    async loadFile(filename) {
         try {
-            this.showStatus(`Loading ${fileName}.txt...`);
-            
-            const response = await fetch(`gtfs/${fileName}.txt`);
-            
+            const response = await fetch(filename);
             if (!response.ok) {
-                if (required) {
-                    throw new Error(`Failed to load ${fileName}.txt: ${response.status}`);
-                } else {
-                    console.warn(`Optional file ${fileName}.txt not found, skipping`);
-                    return;
-                }
+                throw new Error(`Failed to load ${filename}: ${response.status}`);
             }
-            
-            const text = await response.text();
-            const data = this.parseCSV(text);
-            
-            // Сохраняем данные
-            switch(fileName) {
-                case 'stops':
-                    this.stops = data;
-                    this.loadStatus.stops = true;
-                    break;
-                case 'stop_times':
-                    this.stopTimes = data;
-                    this.loadStatus.stopTimes = true;
-                    break;
-                case 'trips':
-                    this.trips = data;
-                    this.loadStatus.trips = true;
-                    break;
-                case 'routes':
-                    this.routes = data;
-                    this.loadStatus.routes = true;
-                    break;
-                case 'calendar':
-                    this.calendar = data;
-                    this.loadStatus.calendar = true;
-                    break;
-            }
-            
-            console.log(`Loaded ${fileName}.txt: ${data.length} records`);
-            this.showStatus(`${fileName}.txt loaded (${data.length} records)`);
-            
+            return await response.text();
         } catch (error) {
-            console.error(`Error loading ${fileName}.txt:`, error);
-            
-            if (required) {
-                this.showStatus(`Failed to load ${fileName}.txt`);
-                throw error;
-            }
+            console.error(`Error loading ${filename}:`, error);
+            throw error;
         }
     }
 
     parseCSV(text) {
-        if (!text || text.trim().length === 0) {
-            return [];
-        }
-
-        const lines = text.trim().split(/\r?\n/);
-        if (lines.length < 2) return [];
-
-        // Определяем разделитель
-        const firstLine = lines[0];
-        const delimiter = firstLine.includes(';') ? ';' : ',';
+        const lines = text.trim().split('\n');
+        if (lines.length === 0) return [];
         
-        // Парсим заголовки
-        const headers = this.parseCSVLine(firstLine, delimiter)
-            .map(h => h.trim().toLowerCase().replace(/"/g, ''));
+        const headers = lines[0].split(',').map(h => h.trim());
+        const rows = [];
         
-        const data = [];
-
         for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-
-            const values = this.parseCSVLine(line, delimiter);
+            const values = this.parseCSVLine(lines[i]);
+            const row = {};
             
-            if (values.length !== headers.length) {
-                console.warn(`Line ${i + 1}: Column mismatch, skipping`);
-                continue;
+            for (let j = 0; j < headers.length; j++) {
+                if (j < values.length) {
+                    row[headers[j]] = values[j].trim();
+                }
             }
-
-            const obj = {};
-            headers.forEach((header, index) => {
-                obj[header] = values[index] ? values[index].trim().replace(/"/g, '') : '';
-            });
             
-            data.push(obj);
+            rows.push(row);
         }
-
-        return data;
+        
+        return rows;
     }
 
-    parseCSVLine(line, delimiter = ',') {
-        const values = [];
+    parseCSVLine(line) {
+        const result = [];
         let current = '';
         let inQuotes = false;
-        let quoteChar = '';
-
+        
         for (let i = 0; i < line.length; i++) {
             const char = line[i];
-            const nextChar = line[i + 1];
-
-            if (!inQuotes && (char === '"' || char === "'")) {
-                inQuotes = true;
-                quoteChar = char;
-            } else if (inQuotes && char === quoteChar && nextChar === quoteChar) {
-                // Экранированная кавычка
-                current += quoteChar;
-                i++;
-            } else if (inQuotes && char === quoteChar) {
-                inQuotes = false;
-            } else if (!inQuotes && char === delimiter) {
-                values.push(current);
+            
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                result.push(current);
                 current = '';
             } else {
                 current += char;
             }
         }
-
-        values.push(current);
-        return values;
+        
+        result.push(current);
+        return result;
     }
 
-    showStatus(message) {
-        const statusElement = document.getElementById('gtfsStatus');
-        if (statusElement) {
-            statusElement.innerHTML = `
-                <div>${message}</div>
-                <div class="file-status">
-                    <span class="${this.loadStatus.stops ? 'loaded' : 'pending'}">stops.txt</span>
-                    <span class="${this.loadStatus.stopTimes ? 'loaded' : 'pending'}">stop_times.txt</span>
-                    <span class="${this.loadStatus.trips ? 'loaded' : 'pending'}">trips.txt</span>
-                    <span class="${this.loadStatus.routes ? 'loaded' : 'pending'}">routes.txt</span>
-                </div>
-            `;
+    parseStops(text) {
+        const rows = this.parseCSV(text);
+        rows.forEach(row => {
+            this.data.stops.set(row.stop_id, {
+                id: row.stop_id,
+                name: row.stop_name,
+                lat: parseFloat(row.stop_lat),
+                lon: parseFloat(row.stop_lon),
+                code: row.stop_code
+            });
+        });
+    }
+
+    parseStopTimes(text) {
+        const rows = this.parseCSV(text);
+        const stopTimesByTrip = new Map();
+        
+        rows.forEach(row => {
+            const tripId = row.trip_id;
+            const stopId = row.stop_id;
             
-            // Добавляем стили для статусов
-            if (!document.querySelector('#gtfs-status-styles')) {
-                const style = document.createElement('style');
-                style.id = 'gtfs-status-styles';
-                style.textContent = `
-                    .file-status {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 5px;
-                        margin-top: 5px;
-                        font-size: 12px;
-                    }
-                    .file-status span {
-                        padding: 2px 6px;
-                        border-radius: 3px;
-                        font-family: monospace;
-                    }
-                    .file-status .loaded {
-                        background: rgba(72, 187, 120, 0.2);
-                        color: #48bb78;
-                    }
-                    .file-status .pending {
-                        background: rgba(245, 101, 101, 0.2);
-                        color: #f56565;
-                    }
-                `;
-                document.head.appendChild(style);
+            if (!stopTimesByTrip.has(tripId)) {
+                stopTimesByTrip.set(tripId, []);
             }
-        }
-    }
-
-    // Методы поиска и обработки данных
-    findStopById(stopId) {
-        if (!stopId || !this.dataLoaded) return null;
-        
-        // Сначала ищем точное совпадение по stop_id
-        let stop = this.stops.find(s => 
-            s.stop_id && s.stop_id.toString().toLowerCase() === stopId.toString().toLowerCase()
-        );
-        
-        // Если не нашли, ищем по stop_code
-        if (!stop) {
-            stop = this.stops.find(s => 
-                s.stop_code && s.stop_code.toString().toLowerCase() === stopId.toString().toLowerCase()
-            );
-        }
-        
-        // Если все еще не нашли, ищем частичное совпадение в названии
-        if (!stop) {
-            const searchTerm = stopId.toString().toLowerCase();
-            stop = this.stops.find(s => 
-                s.stop_name && s.stop_name.toLowerCase().includes(searchTerm)
-            );
-        }
-        
-        return stop || null;
-    }
-
-    findStopsByName(name) {
-        if (!name || !this.dataLoaded) return [];
-        
-        const searchTerm = name.toString().toLowerCase().trim();
-        if (!searchTerm) return [];
-        
-        return this.stops.filter(stop => {
-            if (stop.stop_name && stop.stop_name.toLowerCase().includes(searchTerm)) return true;
-            if (stop.stop_id && stop.stop_id.toString().toLowerCase().includes(searchTerm)) return true;
-            if (stop.stop_code && stop.stop_code.toString().toLowerCase().includes(searchTerm)) return true;
-            return false;
-        }).slice(0, 10);
-    }
-
-    getTripsForStop(stopId) {
-        if (!stopId || !this.dataLoaded || !this.stopTimes.length) return [];
-        
-        // Находим все stop_times для этой остановки
-        const stopTimesForStop = this.stopTimes.filter(st => 
-            st.stop_id && st.stop_id.toString() === stopId.toString()
-        );
-        
-        if (stopTimesForStop.length === 0) return [];
-        
-        // Получаем уникальные trip_ids
-        const tripIds = [...new Set(stopTimesForStop.map(st => st.trip_id))];
-        
-        // Получаем информацию о рейсах
-        const trips = tripIds.map(tripId => {
-            const trip = this.trips.find(t => t.trip_id && t.trip_id.toString() === tripId.toString());
-            if (!trip) return null;
             
-            const stopTime = stopTimesForStop.find(st => 
-                st.trip_id && st.trip_id.toString() === tripId.toString()
-            );
-            
-            const route = this.routes.find(r => 
-                r.route_id && r.route_id.toString() === (trip.route_id || '').toString()
-            );
-            
-            return {
+            stopTimesByTrip.get(tripId).push({
                 trip_id: tripId,
-                arrival_time: stopTime?.arrival_time || stopTime?.departure_time || '',
-                departure_time: stopTime?.departure_time || '',
-                stop_sequence: stopTime?.stop_sequence || '0',
-                direction_id: trip.direction_id || '0',
-                route_id: trip.route_id || '',
-                route_short_name: route?.route_short_name || route?.route_id || '',
-                route_long_name: route?.route_long_name || '',
-                trip_headsign: trip.trip_headsign || route?.route_long_name || ''
-            };
-        }).filter(trip => trip !== null && trip.route_id);
-        
-        return trips;
-    }
-
-    getRouteDirections(routeId, stopId) {
-        const tripsForRoute = this.getTripsForStop(stopId)
-            .filter(trip => trip.route_id && trip.route_id.toString() === routeId.toString());
-        
-        if (tripsForRoute.length === 0) return [];
-        
-        // Группируем по направлению
-        const directions = {};
-        
-        tripsForRoute.forEach(trip => {
-            const dirId = trip.direction_id || '0';
-            const headsign = trip.trip_headsign || `Direction ${dirId}`;
-            
-            if (!directions[dirId]) {
-                directions[dirId] = {
-                    direction_id: dirId,
-                    trips: [],
-                    headsign: headsign,
-                    nextTrip: null,
-                    route_short_name: trip.route_short_name
-                };
-            }
-            
-            // Добавляем рейс, если его еще нет
-            const exists = directions[dirId].trips.some(t => 
-                t.trip_id && t.trip_id.toString() === trip.trip_id.toString()
-            );
-            
-            if (!exists) {
-                directions[dirId].trips.push(trip);
-            }
-        });
-        
-        // Сортируем рейсы по времени
-        Object.values(directions).forEach(dir => {
-            dir.trips.sort((a, b) => {
-                const timeA = this.parseTimeString(a.arrival_time);
-                const timeB = this.parseTimeString(b.arrival_time);
-                return timeA - timeB;
+                arrival_time: row.arrival_time,
+                departure_time: row.departure_time,
+                stop_id: stopId,
+                stop_sequence: parseInt(row.stop_sequence),
+                pickup_type: parseInt(row.pickup_type) || 0,
+                drop_off_type: parseInt(row.drop_off_type) || 0
             });
-            dir.nextTrip = this.getNextTrip(dir.trips);
         });
         
-        return Object.values(directions);
+        // Сортируем остановки в каждом рейсе по последовательности
+        stopTimesByTrip.forEach((stops, tripId) => {
+            stops.sort((a, b) => a.stop_sequence - b.stop_sequence);
+            this.data.stopTimes.set(tripId, stops);
+        });
     }
 
-    getNextTrip(trips) {
+    parseTrips(text) {
+        const rows = this.parseCSV(text);
+        rows.forEach(row => {
+            this.data.trips.set(row.trip_id, {
+                trip_id: row.trip_id,
+                route_id: row.route_id,
+                service_id: row.service_id,
+                trip_headsign: row.trip_headsign,
+                direction_id: parseInt(row.direction_id) || 0,
+                shape_id: row.shape_id
+            });
+        });
+    }
+
+    parseRoutes(text) {
+        const rows = this.parseCSV(text);
+        rows.forEach(row => {
+            this.data.routes.set(row.route_id, {
+                route_id: row.route_id,
+                short_name: row.route_short_name,
+                long_name: row.route_long_name,
+                type: parseInt(row.route_type),
+                color: row.route_color || '000000',
+                text_color: row.route_text_color || 'FFFFFF'
+            });
+        });
+    }
+
+    parseCalendar(text) {
+        const rows = this.parseCSV(text);
+        rows.forEach(row => {
+            this.data.calendar.set(row.service_id, {
+                service_id: row.service_id,
+                monday: row.monday === '1',
+                tuesday: row.tuesday === '1',
+                wednesday: row.wednesday === '1',
+                thursday: row.thursday === '1',
+                friday: row.friday === '1',
+                saturday: row.saturday === '1',
+                sunday: row.sunday === '1',
+                start_date: row.start_date,
+                end_date: row.end_date
+            });
+        });
+    }
+
+    parseCalendarDates(text) {
+        const rows = this.parseCSV(text);
+        rows.forEach(row => {
+            const serviceId = row.service_id;
+            const date = row.date;
+            
+            if (!this.data.calendarDates.has(serviceId)) {
+                this.data.calendarDates.set(serviceId, []);
+            }
+            
+            this.data.calendarDates.get(serviceId).push({
+                date: date,
+                exception_type: parseInt(row.exception_type)
+            });
+        });
+    }
+
+    // Проверяем, активен ли сервис на сегодня
+    isServiceActiveToday(serviceId) {
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0].replace(/-/g, '');
+        const dayOfWeek = today.getDay(); // 0 = воскресенье, 1 = понедельник
+        
+        // Проверяем calendar_dates.txt
+        const dateExceptions = this.data.calendarDates.get(serviceId) || [];
+        for (const exception of dateExceptions) {
+            if (exception.date === todayStr) {
+                return exception.exception_type === 1; // 1 = добавлен, 2 = удален
+            }
+        }
+        
+        // Проверяем calendar.txt
+        const calendar = this.data.calendar.get(serviceId);
+        if (!calendar) return false;
+        
+        // Проверяем даты
+        if (todayStr < calendar.start_date || todayStr > calendar.end_date) {
+            return false;
+        }
+        
+        // Проверяем день недели
+        const dayMap = {
+            0: 'sunday',
+            1: 'monday',
+            2: 'tuesday',
+            3: 'wednesday',
+            4: 'thursday',
+            5: 'friday',
+            6: 'saturday'
+        };
+        
+        return calendar[dayMap[dayOfWeek]];
+    }
+
+    // Получаем ближайшие отправления для остановки
+    getNextDepartures(stopId, maxResults = 10) {
+        if (!this.isLoaded) return [];
+        
+        const departures = [];
         const now = new Date();
-        const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
         
-        let nextTrip = null;
-        let minDiff = Infinity;
-        
-        trips.forEach(trip => {
-            if (!trip.arrival_time) return;
-            
-            const tripSeconds = this.parseTimeString(trip.arrival_time);
-            if (tripSeconds === null) return;
-            
-            let diff = tripSeconds - currentSeconds;
-            
-            // Корректировка для времени после полуночи (например, 25:30:00)
-            if (diff < -3600) { // Если разница больше 1 часа в прошлом
-                diff += 24 * 3600;
-            }
-            
-            // Игнорируем поезда, которые ушли больше чем 5 минут назад
-            if (diff < -300) return;
-            
-            if (diff >= 0 && diff < minDiff) {
-                minDiff = diff;
-                nextTrip = {
-                    ...trip,
-                    arrival_seconds: tripSeconds,
-                    diff_minutes: Math.max(0, Math.ceil(diff / 60)),
-                    arrival_time_formatted: this.formatTimeFromSeconds(tripSeconds)
-                };
-            }
-        });
-        
-        return nextTrip;
-    }
-
-    getStopsForDirection(routeId, directionId, currentStopId) {
-        // Находим подходящий рейс
-        let sampleTrip = this.trips.find(t => 
-            t.route_id && t.route_id.toString() === routeId.toString() &&
-            t.direction_id && t.direction_id.toString() === directionId.toString()
-        );
-        
-        // Если не нашли, берем любой рейс с этим route_id
-        if (!sampleTrip) {
-            sampleTrip = this.trips.find(t => 
-                t.route_id && t.route_id.toString() === routeId.toString()
-            );
-        }
-        
-        if (!sampleTrip || !sampleTrip.trip_id) return [];
-        
-        // Получаем все остановки для этого рейса
-        return this.getStopsForTrip(sampleTrip.trip_id, currentStopId);
-    }
-
-    getStopsForTrip(tripId, currentStopId) {
-        if (!tripId || !this.stopTimes.length) return [];
-        
-        // Фильтруем и сортируем остановки
-        const stopsForTrip = this.stopTimes
-            .filter(st => 
-                st.trip_id && st.trip_id.toString() === tripId.toString()
-            )
-            .sort((a, b) => {
-                const seqA = parseInt(a.stop_sequence) || 0;
-                const seqB = parseInt(b.stop_sequence) || 0;
-                return seqA - seqB;
-            })
-            .map(st => {
-                const stopInfo = this.stops.find(s => 
-                    s.stop_id && s.stop_id.toString() === st.stop_id.toString()
-                );
+        // Ищем все stop_times для этой остановки
+        for (const [tripId, stopTimes] of this.data.stopTimes) {
+            for (let i = 0; i < stopTimes.length; i++) {
+                const stopTime = stopTimes[i];
                 
-                return {
-                    stop_id: st.stop_id || '',
-                    stop_name: stopInfo?.stop_name || `Stop ${st.stop_id}`,
-                    arrival_time: st.arrival_time || st.departure_time || '',
-                    departure_time: st.departure_time || '',
-                    stop_sequence: parseInt(st.stop_sequence) || 0,
-                    is_current: st.stop_id && st.stop_id.toString() === currentStopId.toString()
-                };
-            });
-        
-        return stopsForTrip;
-    }
-
-    parseTimeString(timeStr) {
-        if (!timeStr) return null;
-        
-        const match = timeStr.match(/(\d{1,2}):(\d{2}):?(\d{2})?/);
-        if (!match) return null;
-        
-        let hours = parseInt(match[1]) || 0;
-        const minutes = parseInt(match[2]) || 0;
-        const seconds = parseInt(match[3]) || 0;
-        
-        // Обработка формата >24 часов (например, 25:30:00)
-        if (hours >= 24) {
-            hours = hours % 24;
+                if (stopTime.stop_id === stopId) {
+                    // Получаем информацию о рейсе
+                    const trip = this.data.trips.get(tripId);
+                    if (!trip) continue;
+                    
+                    // Проверяем, активен ли сервис сегодня
+                    if (!this.isServiceActiveToday(trip.service_id)) {
+                        continue;
+                    }
+                    
+                    // Получаем информацию о маршруте
+                    const route = this.data.routes.get(trip.route_id);
+                    if (!route) continue;
+                    
+                    // Парсим время отправления
+                    const departureSeconds = this.timeToSeconds(stopTime.departure_time);
+                    
+                    // Если отправление в будущем (или в ближайшие 5 минут в прошлом)
+                    if (departureSeconds >= currentTime - 300) {
+                        // Получаем следующие остановки
+                        const nextStops = [];
+                        for (let j = i + 1; j < Math.min(i + 6, stopTimes.length); j++) {
+                            const nextStop = this.data.stops.get(stopTimes[j].stop_id);
+                            if (nextStop) {
+                                nextStops.push(nextStop.name);
+                            }
+                        }
+                        
+                        // Получаем конечную станцию
+                        const lastStopTime = stopTimes[stopTimes.length - 1];
+                        const lastStop = this.data.stops.get(lastStopTime.stop_id);
+                        
+                        departures.push({
+                            tripId: tripId,
+                            routeId: route.route_id,
+                            routeShortName: route.short_name,
+                            routeLongName: route.long_name,
+                            routeColor: '#' + (route.color || '000000'),
+                            headsign: trip.trip_headsign,
+                            destination: lastStop ? lastStop.name : trip.trip_headsign,
+                            departureTime: stopTime.departure_time,
+                            departureSeconds: departureSeconds,
+                            minutes: Math.floor((departureSeconds - currentTime) / 60),
+                            nextStops: nextStops,
+                            directionId: trip.direction_id,
+                            stopSequence: stopTime.stop_sequence
+                        });
+                    }
+                    break; // Переходим к следующему рейсу
+                }
+            }
         }
         
+        // Сортируем по времени и ограничиваем количество
+        return departures
+            .sort((a, b) => a.departureSeconds - b.departureSeconds)
+            .slice(0, maxResults);
+    }
+
+    timeToSeconds(timeStr) {
+        if (!timeStr) return 0;
+        const parts = timeStr.split(':');
+        if (parts.length !== 3) return 0;
+        
+        const hours = parseInt(parts[0]);
+        const minutes = parseInt(parts[1]);
+        const seconds = parseInt(parts[2]);
+        
+        // Обрабатываем время больше 24 часов (например, 25:30:00)
         return hours * 3600 + minutes * 60 + seconds;
     }
 
-    formatTimeFromSeconds(seconds) {
-        if (seconds === null || seconds === undefined) return '--:--';
+    // Получаем информацию об остановке
+    getStopInfo(stopId) {
+        return this.data.stops.get(stopId);
+    }
+
+    // Получаем все маршруты, проходящие через остановку
+    getRoutesForStop(stopId) {
+        const routeIds = new Set();
         
-        const hours = Math.floor(seconds / 3600) % 24;
-        const minutes = Math.floor((seconds % 3600) / 60);
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        for (const [tripId, stopTimes] of this.data.stopTimes) {
+            for (const stopTime of stopTimes) {
+                if (stopTime.stop_id === stopId) {
+                    const trip = this.data.trips.get(tripId);
+                    if (trip) {
+                        routeIds.add(trip.route_id);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        const routes = [];
+        for (const routeId of routeIds) {
+            const route = this.data.routes.get(routeId);
+            if (route) {
+                routes.push({
+                    id: routeId,
+                    shortName: route.short_name,
+                    longName: route.long_name,
+                    color: '#' + (route.color || '000000')
+                });
+            }
+        }
+        
+        return routes.sort((a, b) => a.shortName.localeCompare(b.shortName));
+    }
+
+    // Получаем направления для маршрута на остановке
+    getDirectionsForRoute(stopId, routeId) {
+        const directions = new Map();
+        
+        for (const [tripId, stopTimes] of this.data.stopTimes) {
+            const trip = this.data.trips.get(tripId);
+            if (!trip || trip.route_id !== routeId) continue;
+            
+            for (const stopTime of stopTimes) {
+                if (stopTime.stop_id === stopId) {
+                    const direction = {
+                        id: trip.direction_id,
+                        name: trip.trip_headsign || `Direction ${trip.direction_id}`,
+                        trips: []
+                    };
+                    
+                    if (!directions.has(trip.direction_id)) {
+                        directions.set(trip.direction_id, direction);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        return Array.from(directions.values());
     }
 }
 
-// PAD Display Manager
-class PADDisplay {
+class DepartureBoard {
     constructor() {
-        this.gtfs = new GTFSManager();
-        this.currentStopId = null;
-        this.currentRoute = null;
-        this.currentDirection = null;
-        this.stations = [];
+        this.gtfs = new GTFSProcessor();
+        this.currentStopId = this.getStopIdFromURL();
+        this.departures = [];
+        this.isLoading = false;
         this.updateInterval = null;
+        
         this.init();
     }
 
     async init() {
-        this.showMessage('Loading GTFS data...', 'loading');
+        this.showLoading();
         
-        // Загружаем GTFS данные
-        const loaded = await this.gtfs.loadGTFSData();
+        // Сначала загружаем GTFS данные
+        const success = await this.gtfs.loadAllData();
         
-        if (!loaded) {
-            this.showMessage(
-                'Failed to load GTFS data. Please make sure GTFS files are in the /gtfs folder.',
-                'error'
-            );
+        if (!success) {
+            this.showError('Erreur de chargement des données GTFS');
             return;
         }
         
-        // Проверяем URL на наличие stop ID
-        this.checkURLForStopId();
+        // Обновляем информацию об остановке
+        this.updateStationInfo();
         
-        // Инициализируем обработчики событий
-        this.initEventListeners();
+        // Настраиваем селекторы
+        this.setupSelectors();
         
-        // Запускаем часы
-        this.updateClock();
-        setInterval(() => this.updateClock(), 1000);
+        // Загружаем первые данные
+        await this.loadDepartures();
         
-        // Автообновление каждые 60 секунд
-        this.updateInterval = setInterval(() => {
-            if (this.currentStopId) {
-                this.refreshData();
-            }
-        }, 60000);
+        // Запускаем автообновление
+        this.startAutoUpdate();
     }
 
-    showMessage(message, type = 'info') {
-        const stationsTrack = document.getElementById('stationsTrack');
-        if (!stationsTrack) return;
-        
-        stationsTrack.innerHTML = `
-            <div class="message ${type}">
-                <i class="fas fa-${type === 'loading' ? 'spinner fa-spin' : 
-                                 type === 'error' ? 'exclamation-triangle' : 
-                                 'info-circle'}"></i>
-                <div>${message}</div>
-            </div>
-        `;
-    }
-
-    checkURLForStopId() {
+    getStopIdFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
-        const stopId = urlParams.get('id');
+        return urlParams.get('id') || '8775860'; // Gare de Lyon RER по умолчанию
+    }
+
+    updateStationInfo() {
+        const stopInfo = this.gtfs.getStopInfo(this.currentStopId);
+        const stationName = stopInfo ? stopInfo.name : `Arrêt ${this.currentStopId}`;
         
-        if (stopId) {
-            document.getElementById('stopSearch').value = stopId;
-            this.loadStop(stopId);
+        document.querySelector('.station-name').textContent = stationName;
+        document.getElementById('stop-id').textContent = this.currentStopId;
+        document.title = `Tablo RER - ${stationName}`;
+    }
+
+    setupSelectors() {
+        // Получаем маршруты для этой остановки
+        const routes = this.gtfs.getRoutesForStop(this.currentStopId);
+        
+        // Заполняем селекторы линий
+        this.populateLineSelectors(routes);
+        
+        // Назначаем обработчики событий
+        document.getElementById('line1').addEventListener('change', (e) => this.onLineChange(e.target, 'direction1'));
+        document.getElementById('line2').addEventListener('change', (e) => this.onLineChange(e.target, 'direction2'));
+        
+        document.getElementById('direction1').addEventListener('change', () => this.loadDepartures());
+        document.getElementById('direction2').addEventListener('change', () => this.loadDepartures());
+    }
+
+    populateLineSelectors(routes) {
+        const line1Select = document.getElementById('line1');
+        const line2Select = document.getElementById('line2');
+        
+        // Очищаем селекторы
+        line1Select.innerHTML = '';
+        line2Select.innerHTML = '<option value="">-- Choisir ligne --</option>';
+        
+        // Добавляем маршруты в первый селектор
+        routes.forEach(route => {
+            const option = document.createElement('option');
+            option.value = route.id;
+            option.textContent = `${route.shortName} - ${route.longName}`;
+            option.dataset.color = route.color;
+            line1Select.appendChild(option.cloneNode(true));
+            line2Select.appendChild(option);
+        });
+        
+        // Выбираем первый маршрут по умолчанию
+        if (routes.length > 0) {
+            line1Select.value = routes[0].id;
+            this.onLineChange(line1Select, 'direction1');
+        }
+        
+        // Выбираем второй маршрут, если есть
+        if (routes.length > 1) {
+            line2Select.value = routes[1].id;
+            this.onLineChange(line2Select, 'direction2');
         }
     }
 
-    initEventListeners() {
-        // Кнопка поиска
-        document.getElementById('searchBtn').addEventListener('click', () => {
-            const searchValue = document.getElementById('stopSearch').value.trim();
-            if (searchValue) {
-                this.loadStop(searchValue);
-            }
+    async onLineChange(lineSelect, directionSelectId) {
+        const routeId = lineSelect.value;
+        const directionSelect = document.getElementById(directionSelectId);
+        
+        // Очищаем селектор направлений
+        directionSelect.innerHTML = '<option value="">-- Choisir direction --</option>';
+        
+        if (!routeId) return;
+        
+        // Получаем направления для этого маршрута
+        const directions = this.gtfs.getDirectionsForRoute(this.currentStopId, routeId);
+        
+        // Заполняем селектор направлений
+        directions.forEach(direction => {
+            const option = document.createElement('option');
+            option.value = direction.id;
+            option.textContent = direction.name;
+            directionSelect.appendChild(option);
         });
         
-        // Enter в поле поиска
-        document.getElementById('stopSearch').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const searchValue = e.target.value.trim();
-                if (searchValue) {
-                    this.loadStop(searchValue);
-                }
-            }
-        });
-        
-        // Кнопка обновления
-        document.getElementById('refreshBtn').addEventListener('click', () => {
-            this.refreshData();
-        });
-        
-        // Убираем демо кнопку, так как она нам не нужна
-        const demoBtn = document.getElementById('demoBtn');
-        if (demoBtn) {
-            demoBtn.style.display = 'none';
+        // Выбираем первое направление по умолчанию
+        if (directions.length > 0) {
+            directionSelect.value = directions[0].id;
         }
         
-        // Ссылка "View Source"
-        document.getElementById('viewSource')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.open('https://github.com/yourusername/gtfs-pad', '_blank');
-        });
+        // Обновляем табло
+        await this.loadDepartures();
     }
 
-    async loadStop(stopIdOrName) {
-        if (!this.gtfs.dataLoaded) {
-            this.showMessage('GTFS data is still loading. Please wait...', 'error');
-            return;
-        }
+    async loadDepartures() {
+        if (this.isLoading) return;
         
-        this.showMessage(`Searching for stop: ${stopIdOrName}...`, 'loading');
-        
-        // Ищем остановку
-        const stop = this.gtfs.findStopById(stopIdOrName);
-        
-        if (!stop) {
-            // Пробуем найти по имени
-            const similarStops = this.gtfs.findStopsByName(stopIdOrName);
-            
-            if (similarStops.length === 0) {
-                this.showMessage(`Stop "${stopIdOrName}" not found in GTFS data.`, 'error');
-                return;
-            }
-            
-            if (similarStops.length === 1) {
-                // Если нашли только одну остановку, используем ее
-                this.currentStopId = similarStops[0].stop_id;
-            } else {
-                // Если нашли несколько, показываем выбор
-                this.showStopSelection(similarStops);
-                return;
-            }
-        } else {
-            this.currentStopId = stop.stop_id;
-        }
-        
-        this.updateURL(this.currentStopId);
-        await this.processStop();
-    }
-
-    showStopSelection(stops) {
-        const stationsTrack = document.getElementById('stationsTrack');
-        if (!stationsTrack) return;
-        
-        stationsTrack.innerHTML = `
-            <div class="selection-container">
-                <h3>Multiple stops found:</h3>
-                <div class="stops-list">
-                    ${stops.map(stop => `
-                        <div class="stop-item" data-stop-id="${stop.stop_id}">
-                            <div class="stop-name">${stop.stop_name || 'Unnamed Stop'}</div>
-                            <div class="stop-id">ID: ${stop.stop_id}</div>
-                            ${stop.stop_code ? `<div class="stop-code">Code: ${stop.stop_code}</div>` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-        
-        // Добавляем обработчики
-        document.querySelectorAll('.stop-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const stopId = item.getAttribute('data-stop-id');
-                document.getElementById('stopSearch').value = stopId;
-                this.currentStopId = stopId;
-                this.updateURL(stopId);
-                this.processStop();
-            });
-        });
-    }
-
-    updateURL(stopId) {
-        const url = new URL(window.location);
-        url.searchParams.set('id', stopId);
-        window.history.replaceState({}, '', url);
-    }
-
-    async processStop() {
-        if (!this.currentStopId) {
-            this.showMessage('No stop selected.', 'error');
-            return;
-        }
-        
-        this.showMessage('Loading stop information...', 'loading');
+        this.isLoading = true;
+        this.showLoading();
         
         try {
-            // Получаем рейсы для этой остановки
-            const trips = this.gtfs.getTripsForStop(this.currentStopId);
+            const line1 = document.getElementById('line1').value;
+            const direction1 = document.getElementById('direction1').value;
+            const line2 = document.getElementById('line2').value;
+            const direction2 = document.getElementById('direction2').value;
             
-            if (trips.length === 0) {
-                this.showMessage('No trips found for this stop.', 'error');
-                return;
+            const departures = [];
+            
+            // Загружаем отправления для первой линии
+            if (line1 && direction1) {
+                const deps1 = this.getDeparturesForLine(line1, parseInt(direction1));
+                departures.push(...deps1);
             }
             
-            // Группируем по маршрутам
-            const routes = {};
-            trips.forEach(trip => {
-                if (!trip.route_id) return;
-                
-                const routeId = trip.route_id;
-                if (!routes[routeId]) {
-                    routes[routeId] = {
-                        route_id: routeId,
-                        route_short_name: trip.route_short_name,
-                        route_long_name: trip.route_long_name,
-                        trips: []
-                    };
-                }
-                routes[routeId].trips.push(trip);
-            });
-            
-            // Выбираем маршрут с наибольшим количеством рейсов
-            let selectedRouteId = null;
-            let maxTrips = 0;
-            
-            for (const [routeId, route] of Object.entries(routes)) {
-                if (route.trips.length > maxTrips) {
-                    maxTrips = route.trips.length;
-                    selectedRouteId = routeId;
-                }
+            // Загружаем отправления для второй линии
+            if (line2 && direction2) {
+                const deps2 = this.getDeparturesForLine(line2, parseInt(direction2));
+                departures.push(...deps2);
             }
             
-            if (!selectedRouteId) {
-                this.showMessage('Could not determine route.', 'error');
-                return;
-            }
+            // Сортируем и ограничиваем количество
+            this.departures = departures
+                .sort((a, b) => a.minutes - b.minutes)
+                .slice(0, 6);
             
-            this.currentRoute = routes[selectedRouteId];
-            
-            // Получаем направления для этого маршрута
-            const directions = this.gtfs.getRouteDirections(selectedRouteId, this.currentStopId);
-            
-            if (directions.length === 0) {
-                this.showMessage('No directions found for this route.', 'error');
-                return;
-            }
-            
-            // Выбираем направление с ближайшим рейсом
-            directions.sort((a, b) => {
-                const aTime = a.nextTrip ? a.nextTrip.diff_minutes : Infinity;
-                const bTime = b.nextTrip ? b.nextTrip.diff_minutes : Infinity;
-                return aTime - bTime;
-            });
-            
-            this.currentDirection = directions[0];
-            
-            // Получаем остановки для этого направления
-            this.stations = this.gtfs.getStopsForDirection(
-                selectedRouteId, 
-                this.currentDirection.direction_id, 
-                this.currentStopId
-            );
-            
-            if (this.stations.length === 0) {
-                this.showMessage('Could not load route information.', 'error');
-                return;
-            }
-            
-            // Обновляем отображение
-            this.updateDisplay();
-            this.updateInfoPanel(trips, directions);
-            
+            // Отображаем
+            this.renderDepartures();
+            this.updateTimestamp();
         } catch (error) {
-            console.error('Error processing stop:', error);
-            this.showMessage(`Error: ${error.message}`, 'error');
+            console.error('Error loading departures:', error);
+            this.showError('Erreur de chargement des horaires');
+        } finally {
+            this.isLoading = false;
         }
     }
 
-    updateDisplay() {
-        if (!this.currentRoute || !this.currentDirection || !this.stations.length) {
+    getDeparturesForLine(routeId, directionId) {
+        // Получаем все отправления для остановки
+        const allDepartures = this.gtfs.getNextDepartures(this.currentStopId, 20);
+        
+        // Фильтруем по маршруту и направлению
+        return allDepartures.filter(dep => 
+            dep.routeId === routeId && dep.directionId === directionId
+        );
+    }
+
+    renderDepartures() {
+        const container = document.getElementById('departure-list');
+        
+        if (this.departures.length === 0) {
+            container.innerHTML = `
+                <div class="no-departures">
+                    <h3>Aucun départ prévu</h3>
+                    <p>Aucun train n'est prévu dans les prochaines heures.</p>
+                </div>
+            `;
             return;
         }
         
-        // Обновляем заголовок
-        const lineName = document.getElementById('lineName');
-        const lineDirection = document.getElementById('lineDirection');
+        // Группируем отправления по времени для выявления совместных линий
+        const groupedDepartures = this.groupDeparturesByTime();
         
-        lineName.textContent = this.currentRoute.route_short_name || 
-                              this.currentRoute.route_id || 
-                              '--';
+        container.innerHTML = '';
         
-        lineDirection.textContent = this.currentDirection.headsign || 
-                                   `Direction ${this.currentDirection.direction_id}`;
-        
-        // Обновляем время
-        const now = new Date();
-        const currentTime = document.getElementById('currentTime');
-        const nextTrainTime = document.getElementById('nextTrainTime');
-        
-        currentTime.textContent = now.toLocaleTimeString([], {
-            hour: '2-digit', 
-            minute: '2-digit'
-        });
-        
-        if (this.currentDirection.nextTrip) {
-            const nextTime = this.gtfs.formatTimeFromSeconds(
-                this.currentDirection.nextTrip.arrival_seconds
-            );
-            nextTrainTime.textContent = 
-                `Next: ${nextTime} (in ${this.currentDirection.nextTrip.diff_minutes} min)`;
-        } else {
-            nextTrainTime.textContent = 'Next: --:--';
-        }
-        
-        // Отображаем станции
-        this.renderStations();
-        
-        // Обновляем подвал
-        const lastStop = this.stations[this.stations.length - 1];
-        const destinationName = document.getElementById('destinationName');
-        const updateStatus = document.getElementById('updateStatus');
-        
-        destinationName.textContent = lastStop?.stop_name || 'Unknown destination';
-        
-        updateStatus.textContent = 
-            `Last update: ${now.toLocaleTimeString([], {
-                hour: '2-digit', 
-                minute: '2-digit'
-            })}`;
-    }
-
-    renderStations() {
-        const stationsTrack = document.getElementById('stationsTrack');
-        if (!stationsTrack) return;
-        
-        const currentIndex = this.stations.findIndex(s => s.is_current);
-        
-        stationsTrack.innerHTML = this.stations.map((station, index) => {
-            let stationClass = 'station';
-            
-            if (index < currentIndex) {
-                stationClass += ' passed';
-            } else if (index === currentIndex) {
-                stationClass += ' current';
+        groupedDepartures.forEach((group, index) => {
+            if (group.length === 1) {
+                // Одиночное отправление
+                const departure = group[0];
+                const element = this.createDepartureElement(departure, index);
+                container.appendChild(element);
             } else {
-                stationClass += ' upcoming';
+                // Совместные отправления
+                const groupElement = this.createSharedDepartureGroup(group, index);
+                container.appendChild(groupElement);
             }
-            
-            // Форматируем время
-            let timeDisplay = '';
-            if (station.arrival_time) {
-                const timeMatch = station.arrival_time.match(/(\d{1,2}):(\d{2})/);
-                if (timeMatch) {
-                    const hours = timeMatch[1].padStart(2, '0');
-                    const minutes = timeMatch[2];
-                    timeDisplay = `${hours}:${minutes}`;
-                }
-            }
-            
-            return `
-                <div class="${stationClass}">
-                    <div class="station-name">${station.stop_name}</div>
-                    ${timeDisplay ? `<div class="station-time">${timeDisplay}</div>` : ''}
-                    ${station.is_current ? '<div class="station-current">CURRENT</div>' : ''}
-                </div>
-            `;
-        }).join('');
+        });
     }
 
-    updateInfoPanel(trips, directions) {
-        // Обновляем информацию о текущей остановке
-        const currentStop = this.gtfs.findStopById(this.currentStopId);
-        document.getElementById('currentStopInfo').textContent = 
-            currentStop ? currentStop.stop_name : 'Unknown';
+    groupDeparturesByTime() {
+        const groups = [];
+        const timeTolerance = 2; // минуты
         
-        // Обновляем количество направлений
-        document.getElementById('directionsCount').textContent = directions.length;
-        
-        // Обновляем время до следующего поезда
-        const nextTrainMinutes = document.getElementById('nextTrainMinutes');
-        if (this.currentDirection.nextTrip) {
-            nextTrainMinutes.textContent = this.currentDirection.nextTrip.diff_minutes;
-        } else {
-            nextTrainMinutes.textContent = '--';
-        }
-        
-        // Обновляем список следующих поездов
-        const followingTrainsList = document.getElementById('followingTrains');
-        followingTrainsList.innerHTML = '';
-        
-        // Собираем все ближайшие рейсы из всех направлений
-        const upcomingTrips = [];
-        
-        directions.forEach(dir => {
-            if (dir.nextTrip) {
-                upcomingTrips.push({
-                    ...dir.nextTrip,
-                    direction: dir.headsign || `Direction ${dir.direction_id}`
-                });
+        this.departures.forEach(departure => {
+            let addedToGroup = false;
+            
+            for (const group of groups) {
+                const groupTime = group[0].minutes;
+                if (Math.abs(departure.minutes - groupTime) <= timeTolerance) {
+                    group.push(departure);
+                    addedToGroup = true;
+                    break;
+                }
             }
             
-            // Добавляем еще несколько рейсов из этого направления
-            dir.trips.slice(0, 3).forEach(trip => {
-                if (trip.arrival_time && (!dir.nextTrip || trip.trip_id !== dir.nextTrip.trip_id)) {
-                    const tripSeconds = this.gtfs.parseTimeString(trip.arrival_time);
-                    if (tripSeconds === null) return;
-                    
-                    const now = new Date();
-                    const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-                    
-                    let diff = tripSeconds - currentSeconds;
-                    if (diff < -3600) diff += 24 * 3600;
-                    
-                    if (diff > 0 && diff < 3600) { // В течение следующего часа
-                        upcomingTrips.push({
-                            ...trip,
-                            arrival_seconds: tripSeconds,
-                            diff_minutes: Math.ceil(diff / 60),
-                            direction: dir.headsign || `Direction ${dir.direction_id}`
-                        });
-                    }
-                }
-            });
+            if (!addedToGroup) {
+                groups.push([departure]);
+            }
         });
         
-        // Сортируем и показываем
-        upcomingTrips.sort((a, b) => a.diff_minutes - b.diff_minutes);
+        return groups;
+    }
+
+    createDepartureElement(departure, index) {
+        const div = document.createElement('div');
+        div.className = 'departure-item';
+        div.style.borderLeftColor = departure.routeColor;
+        div.style.animationDelay = `${index * 0.1}s`;
         
-        if (upcomingTrips.length === 0) {
-            const li = document.createElement('li');
-            li.textContent = 'No upcoming trains in the next hour';
-            followingTrainsList.appendChild(li);
-        } else {
-            upcomingTrips.slice(0, 8).forEach(trip => {
-                const li = document.createElement('li');
-                const time = this.gtfs.formatTimeFromSeconds(trip.arrival_seconds);
-                li.textContent = `${time} (in ${trip.diff_minutes} min) - ${trip.direction}`;
-                followingTrainsList.appendChild(li);
-            });
-        }
+        const timeStr = this.formatTime(departure.minutes);
+        
+        div.innerHTML = `
+            <div class="line-badge line-${departure.routeShortName}" style="background: ${departure.routeColor}">
+                ${departure.routeShortName}
+            </div>
+            <div class="departure-info">
+                <div class="destination">${departure.destination}</div>
+                <div class="next-stops">Direction: ${departure.headsign}</div>
+                ${departure.nextStops.length > 0 ? `
+                    <div class="stops-list">
+                        ${departure.nextStops.slice(0, 4).map(stop => 
+                            `<span class="stop-item">${stop}</span>`
+                        ).join('')}
+                        ${departure.nextStops.length > 4 ? 
+                            `<span class="stop-item">+${departure.nextStops.length - 4}</span>` : 
+                            ''
+                        }
+                    </div>
+                ` : ''}
+            </div>
+            <div class="time">${timeStr}</div>
+            <div class="platform">Voie ${Math.floor(Math.random() * 4) + 1}</div>
+        `;
+        
+        return div;
     }
 
-    updateClock() {
+    createSharedDepartureGroup(departures, index) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'shared-line-group';
+        
+        // Создаем элементы для каждого отправления в группе
+        departures.forEach((departure, i) => {
+            const element = this.createDepartureElement(departure, index + i);
+            element.classList.add('shared-line-item');
+            groupDiv.appendChild(element);
+            
+            // Добавляем соединитель между элементами (кроме последнего)
+            if (i < departures.length - 1) {
+                const connector = document.createElement('div');
+                connector.className = 'shared-line-connector';
+                connector.style.setProperty('--line1-color', departure.routeColor);
+                connector.style.setProperty('--line2-color', departures[i + 1].routeColor);
+                groupDiv.appendChild(connector);
+            }
+        });
+        
+        return groupDiv;
+    }
+
+    formatTime(minutes) {
+        if (minutes < 0) return 'À l\'heure';
+        if (minutes < 1) return '< 1 min';
+        if (minutes < 60) return `${minutes} min`;
+        
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return `${hours}h${mins.toString().padStart(2, '0')}`;
+    }
+
+    updateTimestamp() {
         const now = new Date();
-        const liveClock = document.getElementById('liveClock');
-        if (liveClock) {
-            liveClock.textContent = now.toLocaleTimeString([], {
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit'
-            });
-        }
+        const timeStr = now.toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        document.getElementById('update-time').textContent = timeStr;
     }
 
-    refreshData() {
-        if (this.currentStopId) {
-            this.processStop();
+    showLoading() {
+        const container = document.getElementById('departure-list');
+        container.innerHTML = `
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Chargement des horaires...</p>
+            </div>
+        `;
+    }
+
+    showError(message) {
+        const container = document.getElementById('departure-list');
+        container.innerHTML = `
+            <div class="error-message">
+                <h3>${message}</h3>
+                <p>Veuillez réessayer dans quelques instants.</p>
+            </div>
+        `;
+    }
+
+    startAutoUpdate() {
+        // Очищаем предыдущий интервал, если был
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
         }
+        
+        // Устанавливаем новый интервал
+        this.updateInterval = setInterval(() => {
+            this.loadDepartures();
+        }, 5000); // 5 секунд
+        
+        // Также обновляем таймстамп каждую секунду
+        setInterval(() => {
+            this.updateTimestamp();
+        }, 1000);
     }
 }
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
-    window.padDisplay = new PADDisplay();
+    window.departureBoard = new DepartureBoard();
 });
 
-// Добавляем глобальную функцию для отладки
-window.debugGTFS = function() {
-    if (window.padDisplay && window.padDisplay.gtfs) {
-        console.log('GTFS Data Status:', window.padDisplay.gtfs.loadStatus);
-        console.log('Current Stop ID:', window.padDisplay.currentStopId);
-        console.log('Current Route:', window.padDisplay.currentRoute);
-        console.log('Current Direction:', window.padDisplay.currentDirection);
-    }
-};
+// Функция для тестирования с mock данными (если GTFS нет)
+async function setupMockData() {
+    // Создаем простые mock данные для тестирования
+    const mockData = {
+        stops: [
+            {stop_id: '8775860', stop_name: 'Gare de Lyon RER', stop_lat: '48.844', stop_lon: '2.373'},
+            {stop_id: '8775861', stop_name: 'Châtelet-Les Halles', stop_lat: '48.861', stop_lon: '2.347'}
+        ],
+        routes: [
+            {route_id: 'RERA', route_short_name: 'A', route_long_name: 'RER A', route_color: 'FF0000'},
+            {route_id: 'RERB', route_short_name: 'B', route_long_name: 'RER B', route_color: '0000FF'}
+        ],
+        trips: [
+            {trip_id: 'T1', route_id: 'RERA', service_id: 'WEEK', trip_headsign: 'Saint-Germain-en-Laye', direction_id: '0'},
+            {trip_id: 'T2', route_id: 'RERA', service_id: 'WEEK', trip_headsign: 'Marne-la-Vallée', direction_id: '1'}
+        ]
+    };
+    
+    // Сохраняем в localStorage для тестирования
+    localStorage.setItem('mock_gtfs', JSON.stringify(mockData));
+}
+
+// Если нужно протестировать без GTFS данных, раскомментируйте:
+// setupMockData();
