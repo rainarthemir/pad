@@ -10,56 +10,47 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1 class="station-name">Gare de Lyon</h1>
+            <h1 class="station-name" id="station-title">Chargement...</h1>
             <div class="line-selector">
                 <div class="line-selection">
                     <label for="line1">Ligne 1:</label>
                     <select id="line1">
-                        <option value="RERA">RER A</option>
-                        <option value="RERB">RER B</option>
-                        <option value="RERC">RER C</option>
-                        <option value="RERD">RER D</option>
-                        <option value="RERE">RER E</option>
+                        <option value="">-- Chargement --</option>
                     </select>
                     
                     <label for="direction1">Direction 1:</label>
                     <select id="direction1">
-                        <option value="west">Ouest</option>
-                        <option value="east">Est</option>
-                        <option value="north">Nord</option>
-                        <option value="south">Sud</option>
+                        <option value="">-- Sélectionnez d'abord la ligne --</option>
                     </select>
                 </div>
                 
                 <div class="line-selection">
                     <label for="line2">Ligne 2:</label>
                     <select id="line2">
-                        <option value="RERA">RER A</option>
-                        <option value="RERB">RER B</option>
-                        <option value="RERC">RER C</option>
-                        <option value="RERD">RER D</option>
-                        <option value="RERE">RER E</option>
+                        <option value="">-- Chargement --</option>
                     </select>
                     
                     <label for="direction2">Direction 2:</label>
                     <select id="direction2">
-                        <option value="west">Ouest</option>
-                        <option value="east">Est</option>
-                        <option value="north">Nord</option>
-                        <option value="south">Sud</option>
+                        <option value="">-- Sélectionnez d'abord la ligne --</option>
                     </select>
                 </div>
             </div>
         </header>
 
         <main class="departure-board">
-            <!-- Tablo будет заполняться динамически -->
-            <div id="departure-list" class="departure-list"></div>
+            <div id="departure-list" class="departure-list">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Chargement des données GTFS...</p>
+                </div>
+            </div>
         </main>
         
         <footer class="footer">
             <div class="update-time">Dernière mise à jour: <span id="update-time">--:--</span></div>
             <div class="station-id">Arrêt ID: <span id="stop-id">...</span></div>
+            <div class="data-info">Données GTFS en temps réel</div>
         </footer>
     </div>
 
