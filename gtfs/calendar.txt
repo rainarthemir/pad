@@ -1,0 +1,5 @@
+service_id,monday,tuesday,wednesday,thursday,friday,saturday,sunday,start_date,end_date
+all,1,1,1,1,1,1,1,20250827,20400827
+sc,1,1,1,1,1,0,0,20250903,20260707
+LMmJV,1,1,1,1,1,0,0,20250827,20400827
+SD,0,0,0,0,0,1,1,20250827,20400827
