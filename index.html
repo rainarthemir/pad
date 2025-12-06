@@ -10,87 +10,85 @@
 <body>
     <div class="container">
         <header class="header">
-            <div class="station-info">
-                <h1 class="station-name" id="station-title">GARE DE LYON RER</h1>
-                <div class="stop-info">
-                    <span class="stop-id">ID: <span id="stop-id">8775860</span></span>
-                    <span class="current-time" id="current-time">--:--</span>
+            <div class="station-header">
+                <h1 class="station-name" id="station-name">GARE DE LYON RER</h1>
+                <div class="station-info">
+                    <div class="stop-id">ID: <span id="stop-id">8775860</span></div>
+                    <div class="current-time" id="current-time">--:--</div>
                 </div>
             </div>
             
-            <div class="controls-panel">
-                <div class="line-control">
-                    <div class="control-group">
-                        <label for="line1">Ligne 1</label>
-                        <select id="line1" class="line-select">
-                            <option value="">-- Sélection --</option>
+            <div class="controls">
+                <div class="control-panel">
+                    <h3>Ligne 1</h3>
+                    <div class="select-group">
+                        <label for="line1">Ligne:</label>
+                        <select id="line1">
+                            <option value="">-- Choisir --</option>
                         </select>
                     </div>
-                    <div class="control-group">
-                        <label for="direction1">Direction</label>
-                        <select id="direction1" class="direction-select">
-                            <option value="">-- Sélection --</option>
+                    <div class="select-group">
+                        <label for="direction1">Direction:</label>
+                        <select id="direction1">
+                            <option value="">-- Choisir ligne --</option>
                         </select>
                     </div>
                 </div>
                 
-                <div class="line-control">
-                    <div class="control-group">
-                        <label for="line2">Ligne 2</label>
-                        <select id="line2" class="line-select">
-                            <option value="">-- Sélection --</option>
+                <div class="control-panel">
+                    <h3>Ligne 2</h3>
+                    <div class="select-group">
+                        <label for="line2">Ligne:</label>
+                        <select id="line2">
+                            <option value="">-- Choisir --</option>
                         </select>
                     </div>
-                    <div class="control-group">
-                        <label for="direction2">Direction</label>
-                        <select id="direction2" class="direction-select">
-                            <option value="">-- Sélection --</option>
+                    <div class="select-group">
+                        <label for="direction2">Direction:</label>
+                        <select id="direction2">
+                            <option value="">-- Choisir ligne --</option>
                         </select>
                     </div>
                 </div>
             </div>
         </header>
 
-        <main class="plan-display">
-            <div class="display-header">
-                <div class="display-title">PLAN DES LIGNES</div>
-                <div class="auto-update">🔄 Mise à jour automatique</div>
+        <main class="main-display">
+            <div class="display-title">
+                <h2>PLAN DES LIGNES</h2>
+                <div class="auto-refresh">🔄 Auto-rafraîchissement</div>
             </div>
             
-            <!-- Контейнер для схемы линий -->
-            <div id="lines-scheme" class="lines-scheme">
+            <!-- Схема будет здесь -->
+            <div id="scheme-container" class="scheme-container">
                 <div class="loading">
                     <div class="loading-spinner"></div>
-                    <p>Chargement du plan des lignes...</p>
+                    <p>Chargement des lignes RER...</p>
                 </div>
             </div>
             
             <div class="legend">
                 <div class="legend-item">
-                    <span class="legend-color shared"></span>
-                    <span class="legend-text">Lignes partagées</span>
+                    <span class="color-box shared"></span>
+                    <span class="legend-label">Lignes partagées</span>
                 </div>
                 <div class="legend-item">
-                    <span class="legend-color line1-color"></span>
-                    <span class="legend-text">Ligne 1 seule</span>
+                    <span class="color-box line1"></span>
+                    <span class="legend-label">Ligne 1 seule</span>
                 </div>
                 <div class="legend-item">
-                    <span class="legend-color line2-color"></span>
-                    <span class="legend-text">Ligne 2 seule</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-color inactive"></span>
-                    <span class="legend-text">Section inactive</span>
+                    <span class="color-box line2"></span>
+                    <span class="legend-label">Ligne 2 seule</span>
                 </div>
             </div>
         </main>
         
         <footer class="footer">
             <div class="update-info">
-                <span class="update-label">Dernière mise à jour:</span>
-                <span class="update-time" id="update-time">--:--</span>
+                <span class="label">Mise à jour:</span>
+                <span class="time" id="update-time">--:--</span>
             </div>
-            <div class="version">Version GTFS RER</div>
+            <div class="data-source">Données GTFS RER IDFM</div>
         </footer>
     </div>
 
